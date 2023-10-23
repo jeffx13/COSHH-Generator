@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Diagnostics;
-using DocumentFormat.OpenXml.Office2013.Drawing.ChartStyle;
 using System.Threading.Tasks;
 
 namespace COSHH_Generator
@@ -184,8 +183,9 @@ namespace COSHH_Generator
                         if (substanceEntry.DisplayName.Count() == 0) continue;
                         //MessageBox.Show(substanceEntry.name, substanceEntry.name, MessageBoxButton.YesNo);
                         SafetyData sds = substanceEntry.extractionTask != null ? await substanceEntry.extractionTask : new SafetyData();
-                        var amount = substanceEntry.Amount == null ? "N/A" : $"{substanceEntry.Amount.Trim()} {substanceEntry.AmountUnit}" ;
-                        AddSubstance(doc, substanceEntry.DisplayName, amount, sds);
+                        var amount = substanceEntry.Amount == null ? "N/A" : substanceEntry.Amount.Trim();
+                        amount = string.IsNullOrEmpty(amount) ? "N/A" : $"{amount} {substanceEntry.AmountUnit}";
+                        AddSubstance(doc, substanceEntry.DisplayName, amount.Trim(), sds);
                     }
                     var substanceRows = doc.MainDocumentPart!.Document.Body!.Elements<Table>().ElementAt(2).Descendants<TableRow>();
                     if (substanceRows.Count() > 2)
@@ -271,7 +271,9 @@ namespace COSHH_Generator
                     namedCheckBox.Text = named == true ? "☒" : "☐";
                     silicaCheckBox.Text = silicaTLC == true ? "☒" : "☐";
                 }
-                File.SetAttributes(outputPath, FileAttributes.Hidden);
+                FileAttributes attributes = File.GetAttributes(outputPath);
+                attributes &= ~(FileAttributes.Hidden | FileAttributes.ReadOnly);
+                File.SetAttributes(outputPath, attributes);
                 if (MessageBox.Show("Success", "Generation Result", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
                 {
                     new Process

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,6 +35,15 @@ namespace COSHH_Generator
 
             } 
         }
+        
+        public string DisplayNameAndAmount
+        {
+            get
+            {
+                return $"{_DisplayName} {Amount}";
+            }
+        }
+        
         public string query;
         public ObservableCollection<Result> _Results = new ObservableCollection<Result>();
         public ObservableCollection<Result> Results
@@ -44,8 +54,26 @@ namespace COSHH_Generator
             }
         }
 
-        public string Amount { get; set; }
+        public string _Amount = "";
+        public string Amount { 
+            get => _Amount; 
+            set 
+            {
+                _Amount = value;
+                OnPropertyChanged("Amount");
+            } 
+        }
         public string AmountUnit { get; set; }
+        string _Odour = "";
+        public string Odour
+        {
+            get => _Odour;
+            set
+            {
+                _Odour = value;
+                OnPropertyChanged("Odour");
+            }
+        }
 
         public Result? _SelectedResult = null;
         public Result SelectedResult
@@ -57,8 +85,9 @@ namespace COSHH_Generator
                 DisplayName = value.SubstanceName;
             }
         }
+        public SubstanceEntry? chemicalPoolSubstance = null;
 
-
+        public bool UseChemicalPool = false;
         public void Search(in string query)
         {
             if (string.IsNullOrEmpty(query) || this.query == query) return;
@@ -98,17 +127,21 @@ namespace COSHH_Generator
             OnPropertyChanged("Results");
         }
 
-        public void Bind(ref TextBox amount, ref ComboBox amountUnit, ref ComboBox resultsComboBox, ref TextBox substance)
+        public void Bind(ref TextBox amount, ref ComboBox amountUnit, ref ComboBox resultsComboBox, ref TextBox substance, ref ComboBox chemicalPoolComboBox, ref TextBox odourTextBox)
         {
-            amount.TextChanged += (sender, e) => {
-                TextBox? textBox = sender as TextBox;
-                if (textBox != null)
-                {
-                    //MessageBox.Show(textBox.Text, textBox.Text, MessageBoxButton.OK);
-                    Amount = textBox.Text;
-                }
-
-            };
+            //amount.TextChanged += (sender, e) => {
+            //    TextBox? textBox = sender as TextBox;
+            //    if (textBox != null)
+            //    {
+            //        //MessageBox.Show(textBox.Text, textBox.Text, MessageBoxButton.OK);
+            //        Amount = textBox.Text;
+            //    }
+            //};
+            amount.SetBinding(TextBox.TextProperty, new Binding("Amount")
+            {
+                Source = this,
+                Mode = BindingMode.TwoWay,
+            });
 
             amountUnit.SelectionChanged += (sender, args) =>
             {
@@ -124,6 +157,13 @@ namespace COSHH_Generator
 
             });
 
+            odourTextBox.SetBinding(TextBox.TextProperty, new Binding("Odour")
+            {
+                Source = this,
+                Mode = BindingMode.OneWay,
+            });
+            
+
             resultsComboBox.ItemContainerStyle = new Style(typeof(ComboBoxItem))
             {
                 Setters =
@@ -138,7 +178,6 @@ namespace COSHH_Generator
                 if(addedItems.Count > 0)
                 {
                     SelectedResult = (Result)args.AddedItems[0]!;
-                    
                 }
  
             };
@@ -156,11 +195,29 @@ namespace COSHH_Generator
                 
             };
 
+            chemicalPoolComboBox.SelectionChanged += (sender, args) =>
+            {
+                var addedItems = args.AddedItems;
+                if (addedItems.Count > 0)
+                {
+                    chemicalPoolSubstance = (SubstanceEntry)args.AddedItems[0]!;
+                    extractionTask = chemicalPoolSubstance.extractionTask;
+                    DisplayName = chemicalPoolSubstance.DisplayName;
+                    Amount = chemicalPoolSubstance.Amount;
+                }
+            };
         }
+
+        CancellationTokenSource? _tokenSource = null;
 
         public void Extract(in Result substance)
         {
-            extractionTask = SDSParser.Extract(substance.Link);
+            if(_tokenSource != null) _tokenSource.Cancel();
+            _tokenSource = new CancellationTokenSource();
+            extractionTask = SDSParser.Extract(substance.Link, _tokenSource.Token, (odour) =>
+            {
+                Odour = odour;
+            });
             DisplayName = substance.SubstanceName;
         }
         public Task<SafetyData>? extractionTask = null;
@@ -184,11 +241,17 @@ namespace COSHH_Generator
     }
     
     
+    
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
+            SDSParser.extract();
+
+
+
+
             AddNewSubstance();
             dateTextBox.Text = DateTime.Today.ToString("dd/MM/yyyy");
             cachePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, ".cache");
@@ -263,14 +326,16 @@ namespace COSHH_Generator
             }catch(Exception ex) { }
         }
 
+        ChemicalPool chemicalPool = new ChemicalPool();
+
         List<SubstanceEntry> substanceEntries = new List<SubstanceEntry>();
 
         private void OnAddNewSubstancePressed(object sender, RoutedEventArgs e)
         {
             AddNewSubstance();
         }
-
-        private void AddNewSubstance(in TextBox? prevDisplayName = null)
+        int searchOrPoolGroupIndex = 0;
+        private void AddNewSubstance()
         {
             substanceEntries.Add(new SubstanceEntry());
             var index = substanceEntries.Count - 1;
@@ -282,6 +347,8 @@ namespace COSHH_Generator
             grid.RowDefinitions.Add(new RowDefinition());
             grid.RowDefinitions.Add(new RowDefinition());
             grid.RowDefinitions.Add(new RowDefinition());
+            grid.RowDefinitions.Add(new RowDefinition());
+
             grid.ColumnDefinitions.Add(new ColumnDefinition
             {
                 Width = new GridLength(0.06, GridUnitType.Star)
@@ -307,56 +374,137 @@ namespace COSHH_Generator
                 Width = new GridLength(0.2, GridUnitType.Star)
             });
 
+            var searchOrPoolRow = new Grid();
+            searchOrPoolRow.RowDefinitions.Add(new RowDefinition());
+            searchOrPoolRow.ColumnDefinitions.Add(new ColumnDefinition
+            {
+                Width = new GridLength(0.1, GridUnitType.Star)
+            });
+            searchOrPoolRow.ColumnDefinitions.Add(new ColumnDefinition
+            {
+                Width = new GridLength(0.1, GridUnitType.Star)
+            });
+            searchOrPoolRow.ColumnDefinitions.Add(new ColumnDefinition
+            {
+                Width = new GridLength(0.8, GridUnitType.Star)
+            });
 
-            var substanceQueryLabel = new TextBlock();
-            substanceQueryLabel.Focusable = false;
-            substanceQueryLabel.Text = "Query:";
-            grid.Children.Add(substanceQueryLabel);
-            Grid.SetRow(substanceQueryLabel, 0);
-            Grid.SetColumn(substanceQueryLabel, 0);
+            var searchRadioButton = new RadioButton()
+            {
+                Content = new TextBlock()
+                {
+                    Text = "Search"
+                },
+                GroupName = $"searchOrPool{searchOrPoolGroupIndex}",
+                IsChecked = true
+            };
+            searchOrPoolRow.Children.Add(searchRadioButton);
+            Grid.SetRow(searchRadioButton, 0);
+            Grid.SetColumn(searchRadioButton, 0);
 
-            var substanceQuery = new TextBox();
-            substanceQuery.Focusable = true;
-            substanceQuery.Margin = new Thickness(0, 0, 10, 5);
-            grid.Children.Add(substanceQuery);
-            Grid.SetRow(substanceQuery, 0);
-            Grid.SetColumn(substanceQuery, 1);
+            var usePoolRadioButton = new RadioButton()
+            {
+                Content = new TextBlock()
+                {
+                    Text = "Use Pool"
+                },
+                GroupName = $"searchOrPool{searchOrPoolGroupIndex++}"
+            };
+            searchOrPoolRow.Children.Add(usePoolRadioButton);
+            Grid.SetRow(usePoolRadioButton, 0);
+            Grid.SetColumn(usePoolRadioButton, 1);
+
+            var chemicalPoolComboBox = new ComboBox()
+            {
+                IsEnabled = false,
+                IsTextSearchEnabled = true,
+                IsTextSearchCaseSensitive = false,
+                IsEditable = true,
+                DisplayMemberPath = "DisplayNameAndAmount"
+            };
+            chemicalPoolComboBox.IsTabStop = false;
+            chemicalPoolComboBox.PreviewKeyDown += (sender, e) =>
+            {
+                if (e.Key == Key.Tab)
+                {
+                    e.Handled = true;
+                    var cmbTextBox = (TextBox)chemicalPoolComboBox.Template.FindName("PART_EditableTextBox", chemicalPoolComboBox);
+                    cmbTextBox.CaretIndex = cmbTextBox.Text.Length;
+                }
+                else
+                {
+                    if(chemicalPoolComboBox.IsDropDownOpen == false)
+                    {
+                        chemicalPoolComboBox.IsDropDownOpen = true;
+                    }
+                }
+
+            };
+            chemicalPoolComboBox.SetBinding(ComboBox.ItemsSourceProperty, new Binding("Substances")
+            {
+                Source = chemicalPool,
+            });
+            
+            searchOrPoolRow.Children.Add(chemicalPoolComboBox);
+            Grid.SetRow(chemicalPoolComboBox, 0);
+            Grid.SetColumn(chemicalPoolComboBox, 2);
+            
+            
+
+
+
+
+
+            grid.Children.Add(searchOrPoolRow);
+            Grid.SetRow(searchOrPoolRow, 0);
+            Grid.SetColumn(searchOrPoolRow, 0);
+            Grid.SetColumnSpan(searchOrPoolRow, 5);
+
+            searchOrPoolRow.Margin = new Thickness(0, 0, 5, 5);
+
+
+            var seachQueryLabel = new TextBlock();
+            seachQueryLabel.Focusable = false;
+            seachQueryLabel.Text = "Query:";
+            grid.Children.Add(seachQueryLabel);
+            Grid.SetRow(seachQueryLabel, 1);
+            Grid.SetColumn(seachQueryLabel, 0);
+
+            var searchQueryTextBox = new TextBox();
+            searchQueryTextBox.Focusable = true;
+            searchQueryTextBox.Margin = new Thickness(0, 0, 10, 5);
+            grid.Children.Add(searchQueryTextBox);
+            Grid.SetRow(searchQueryTextBox, 1);
+            Grid.SetColumn(searchQueryTextBox, 1);
 
             var amountLabel = new TextBlock();
             amountLabel.Text = "Mass/Volume:";
             grid.Children.Add(amountLabel);
-            Grid.SetRow(amountLabel, 0);
+            Grid.SetRow(amountLabel, 1);
             Grid.SetColumn(amountLabel, 2);
 
-            var amount = new TextBox();
-            amount.Margin = new Thickness(0, 0, 5, 5);
-            //amount.PreviewGotKeyboardFocus += (sender, e) =>
-            //{
-            //    if (index + 2 > substanceEntries.Count)
-            //    {
-            //        AddNewSubstance(null, null);
-            //    }
-            //};
-            grid.Children.Add(amount);
-            Grid.SetRow(amount, 0);
-            Grid.SetColumn(amount, 3);
+            var amountTextBox = new TextBox();
+            amountTextBox.Margin = new Thickness(0, 0, 5, 5);
+            grid.Children.Add(amountTextBox);
+            Grid.SetRow(amountTextBox, 1);
+            Grid.SetColumn(amountTextBox, 3);
 
-            var amountUnit = new ComboBox();
-            amountUnit.IsTabStop = false;
-            amountUnit.Items.Add("mg");
-            amountUnit.Items.Add("mL");
-            amountUnit.Items.Add("g");
-            amountUnit.Items.Add("cm³");
-            amountUnit.Items.Add("L");
-            amountUnit.Margin = new Thickness(0, 0, 5, 5);
-            grid.Children.Add(amountUnit);
-            Grid.SetRow(amountUnit, 0);
-            Grid.SetColumn(amountUnit, 4);
+            var amountUnitComboBox = new ComboBox();
+            amountUnitComboBox.IsTabStop = false;
+            amountUnitComboBox.Items.Add("mg");
+            amountUnitComboBox.Items.Add("mL");
+            amountUnitComboBox.Items.Add("g");
+            amountUnitComboBox.Items.Add("cm³");
+            amountUnitComboBox.Items.Add("L");
+            amountUnitComboBox.Margin = new Thickness(0, 0, 5, 5);
+            grid.Children.Add(amountUnitComboBox);
+            Grid.SetRow(amountUnitComboBox, 1);
+            Grid.SetColumn(amountUnitComboBox, 4);
 
             var resultsLabel = new TextBlock();
             resultsLabel.Text = "Results:";
             grid.Children.Add(resultsLabel);
-            Grid.SetRow(resultsLabel, 1);
+            Grid.SetRow(resultsLabel, 2);
             Grid.SetColumn(resultsLabel, 0);
             
 
@@ -372,7 +520,7 @@ namespace COSHH_Generator
             resultsComboBox.DisplayMemberPath = "ProductName";
             resultsComboBox.Margin = new Thickness(0, 0, 5, 5);
             grid.Children.Add(resultsComboBox);
-            Grid.SetRow(resultsComboBox, 1);
+            Grid.SetRow(resultsComboBox, 2);
             Grid.SetColumn(resultsComboBox, 1);
             Grid.SetColumnSpan(resultsComboBox, 4);
 
@@ -380,29 +528,48 @@ namespace COSHH_Generator
             displayNameGrid.HorizontalAlignment = HorizontalAlignment.Stretch;
             displayNameGrid.ColumnDefinitions.Add(new ColumnDefinition
             {
-                Width = new GridLength(0.15, GridUnitType.Star)
+                Width = new GridLength(0.10, GridUnitType.Star)
             });
             displayNameGrid.ColumnDefinitions.Add(new ColumnDefinition
             {
-                Width = new GridLength(0.85, GridUnitType.Star)
+                Width = new GridLength(0.60, GridUnitType.Star)
+            });
+            displayNameGrid.ColumnDefinitions.Add(new ColumnDefinition
+            {
+                Width = new GridLength(0.05, GridUnitType.Star)
+            });
+            displayNameGrid.ColumnDefinitions.Add(new ColumnDefinition
+            {
+                Width = new GridLength(0.25, GridUnitType.Star)
             });
             var displayNameLabel = new TextBlock { Text = "Display Name:" };
             displayNameGrid.Children.Add(displayNameLabel);
             Grid.SetColumn(displayNameLabel, 0);
+
+            var odourLabel = new TextBlock { Text = "Odour:" };
+            displayNameGrid.Children.Add(odourLabel);
+            Grid.SetColumn(odourLabel, 2);
+
+            var odourTextBox = new TextBox { IsReadOnly = true };
+            odourTextBox.Margin = new Thickness(0, 0, 5, 0);
+            displayNameGrid.Children.Add(odourTextBox);
+            Grid.SetColumn(odourTextBox, 3);
+
             grid.Children.Add(displayNameGrid);
+            Grid.SetRow(displayNameGrid, 3);
             Grid.SetColumn(displayNameGrid, 0);
-            Grid.SetRow(displayNameGrid, 2);
             Grid.SetColumnSpan(displayNameGrid, 5);
 
             var displayName = new TextBox();
             displayName.Margin = new Thickness(0, 0, 5, 0);
             displayNameGrid.Children.Add(displayName);
             Grid.SetColumn(displayName, 1);
-            Binding binding = new Binding("DisplayName");
-            
-            binding.Source = substance;
-            binding.Mode = BindingMode.TwoWay;
-            displayName.SetBinding(TextBox.TextProperty, binding);
+
+            displayName.SetBinding(TextBox.TextProperty, new Binding("DisplayName")
+            {
+                Source = substance,
+                Mode = BindingMode.TwoWay,
+            });
             displayName.PreviewKeyDown += (sender, e) =>
             {
                 if (e.Key == Key.Tab)
@@ -424,16 +591,29 @@ namespace COSHH_Generator
             deleteSubstanceButton.Click += (sender, e) =>
             {
                 substanceEntries.Remove(substance);
-                substanceListBox.Items.Remove(item);
+                substanceListBox.Items.Remove(grid);
             };
             grid.Children.Add(deleteSubstanceButton);
             Grid.SetColumn(deleteSubstanceButton, 6);
             Grid.SetRow(deleteSubstanceButton, 0);
-            Grid.SetRowSpan(deleteSubstanceButton, 3);
+            Grid.SetRowSpan(deleteSubstanceButton, 4);
 
-            substanceEntries.Last().Bind(ref amount, ref amountUnit, ref resultsComboBox, ref substanceQuery);
-            
-            
+            substanceEntries.Last().Bind(ref amountTextBox, ref amountUnitComboBox, ref resultsComboBox, ref searchQueryTextBox, ref chemicalPoolComboBox, ref odourTextBox);
+            usePoolRadioButton.Checked += (sender, e) =>
+            {
+                chemicalPoolComboBox.IsEnabled = true;
+                searchQueryTextBox.IsEnabled = false;
+                resultsComboBox.IsEnabled = false;
+                substanceEntries.Last().UseChemicalPool = true;
+            };
+            searchRadioButton.Checked += (sender, e) =>
+            {
+                chemicalPoolComboBox.IsEnabled = false;
+                searchQueryTextBox.IsEnabled = true;
+                resultsComboBox.IsEnabled = true;
+                substanceEntries.Last().UseChemicalPool = false;
+            };
+
             substanceListBox.Items.Insert(substanceListBox.Items.Count - 1, grid);
             
         }

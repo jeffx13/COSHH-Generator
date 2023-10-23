@@ -56,8 +56,8 @@
 
         </Grid>
 
-        <ListBox Name="substanceListBox" HorizontalContentAlignment="Stretch" KeyboardNavigation.TabNavigation ="Contained" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
-        <Button Click="OnAddNewSubstancePressed" Height="50"> Add New Substance</Button>
+        <ListBox ScrollViewer.CanContentScroll="False" Name="substanceListBox" HorizontalContentAlignment="Stretch" KeyboardNavigation.TabNavigation ="Contained" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+            <Button Click="OnAddNewSubstancePressed" Height="50"> Add New Substance</Button>
         </ListBox>
 
         <Button Name="AddNewSubstanceButton" Grid.Row="2" Grid.Column="0" Click="OnAddNewSubstancePressed" IsTabStop="False">Add substance</Button>

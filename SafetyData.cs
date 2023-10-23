@@ -9,27 +9,111 @@ namespace COSHH_Generator
     class SafetyData
     {
         private Hazard hazards = Hazard.NONE;
-        public bool Eyes => hazards.HasFlag(Hazard.EYES);
-        public bool Skin => hazards.HasFlag(Hazard.SKIN);
-        public bool Inhalation => hazards.HasFlag(Hazard.INHALATION);
-        public bool Ingestion => hazards.HasFlag(Hazard.INGESTION);
-        public bool ConsultSpill => hazards.HasFlag(Hazard.CONSULT_SPILL);
-        public bool Goggles => true;//hazards.HasFlag(Hazard.EYES);
-        public bool LabCoat => true;// hazards.HasFlag(Hazard.SKIN);
-        public bool Gloves => true;// hazards.HasFlag(Hazard.SKIN);
-        public bool Fumehood => hazards.HasFlag(Hazard.INHALATION);
-        public bool NoNakedFlames => hazards.HasFlag(Hazard.FLAMMABLE);
-        public bool UseWaterBath => hazards.HasFlag(Hazard.USE_WATER_BATH);
-        public bool NotUseWhenPregnant => hazards.HasFlag(Hazard.NOT_USE_WHEN_PREGNANT);
-        public bool NotNearWater => hazards.HasFlag(Hazard.NOT_NEAR_WATER);
-        public bool Dropwise => hazards.HasFlag(Hazard.DROPWISE);
-        public bool NotExposeToAir => hazards.HasFlag(Hazard.NOT_EXPOSE_TO_AIR);
-        public bool Flammable => hazards.HasFlag(Hazard.FLAMMABLE);
-        public bool Explosive => hazards.HasFlag(Hazard.EXPLOSIVE);
-        public bool ThermalRunaway => hazards.HasFlag(Hazard.THERMAL_RUNAWAY);
-        public bool GasRelease => hazards.HasFlag(Hazard.GAS_RELEASE);
-        public bool Malodorous => hazards.HasFlag(Hazard.MALODOROUS);
-        public bool GasUnderPressure => hazards.HasFlag(Hazard.GAS_UNDER_PRESSURE);
+        public bool Eyes 
+        { 
+            get => hazards.HasFlag(Hazard.EYES); 
+            set { if (value) { hazards |= Hazard.EYES; } else { hazards &= ~Hazard.EYES; } } 
+        }
+        public bool Skin 
+        { 
+            get => hazards.HasFlag(Hazard.SKIN);
+            set { if (value) { hazards |= Hazard.SKIN; } else { hazards &= ~Hazard.SKIN; } }
+        }
+        public bool Inhalation 
+        { 
+            get => hazards.HasFlag(Hazard.INHALATION);
+            set { if (value) { hazards |= Hazard.INHALATION; } else { hazards &= ~Hazard.INHALATION; } }
+        }
+        public bool Ingestion
+        {
+            get => hazards.HasFlag(Hazard.INGESTION);
+            set { if (value) { hazards |= Hazard.INGESTION; } else { hazards &= ~Hazard.INGESTION; } }
+        }
+        public bool ConsultSpill
+        {
+            get => true;// hazards.HasFlag(Hazard.CONSULT_SPILL);
+            set { if (value) { hazards |= Hazard.CONSULT_SPILL; } else { hazards &= ~Hazard.CONSULT_SPILL; } }
+        }
+        public bool Goggles 
+        {
+            get => true; //hazards.HasFlag(Hazard.EYES);
+            set { if (value) { hazards |= Hazard.EYES; } else { hazards &= ~Hazard.EYES; } }
+        }
+        public bool LabCoat
+        {
+            get => true; // hazards.HasFlag(Hazard.SKIN);
+            set { if (value) { hazards |= Hazard.SKIN; } else { hazards &= ~Hazard.SKIN; } }
+        }
+        public bool Gloves
+        { 
+            get => true; // hazards.HasFlag(Hazard.SKIN);
+            set { if (value) { hazards |= Hazard.GLOVES; ; } else { hazards &= ~Hazard.GLOVES; } }
+        }
+        public bool Fumehood 
+        {
+            get => hazards.HasFlag(Hazard.INHALATION); 
+            set { if (value) { hazards |= Hazard.INHALATION; } else { hazards &= ~Hazard.INHALATION; } } 
+        }
+        public bool NoNakedFlames
+        {
+            get => hazards.HasFlag(Hazard.FLAMMABLE); 
+            set { if (value) { hazards |= Hazard.FLAMMABLE; } else { hazards &= ~Hazard.FLAMMABLE; } } 
+        }
+        public bool UseWaterBath
+        {
+            get => hazards.HasFlag(Hazard.USE_WATER_BATH); 
+            set { if (value) { hazards |= Hazard.EYES; } else { hazards &= ~Hazard.EYES; } } 
+        }
+        public bool NotUseWhenPregnant 
+        {
+            get => hazards.HasFlag(Hazard.NOT_USE_WHEN_PREGNANT);
+            set { if (value) { hazards |= Hazard.NOT_USE_WHEN_PREGNANT; } else { hazards &= ~Hazard.NOT_USE_WHEN_PREGNANT; } }
+        }
+        public bool NotNearWater 
+        {
+            get => hazards.HasFlag(Hazard.NOT_NEAR_WATER);
+            set { if (value) { hazards |= Hazard.NOT_NEAR_WATER; } else { hazards &= ~Hazard.NOT_NEAR_WATER; } }
+        }
+        public bool Dropwise 
+        {
+            get => hazards.HasFlag(Hazard.DROPWISE);
+            set { if (value) { hazards |= Hazard.DROPWISE; } else { hazards &= ~Hazard.DROPWISE; } }
+        }
+        public bool NotExposeToAir 
+        {
+            get => hazards.HasFlag(Hazard.NOT_EXPOSE_TO_AIR); 
+            set { if (value) { hazards |= Hazard.NOT_EXPOSE_TO_AIR; } else { hazards &= ~Hazard.NOT_EXPOSE_TO_AIR; } } 
+        }
+        public bool Flammable 
+        {
+            get => hazards.HasFlag(Hazard.FLAMMABLE); 
+            set { if (value) { hazards |= Hazard.FLAMMABLE; } else { hazards &= ~Hazard.FLAMMABLE; } } 
+        }
+        public bool Explosive 
+        {
+            get => hazards.HasFlag(Hazard.EXPLOSIVE);
+            set { if (value) { hazards |= Hazard.EXPLOSIVE; } else { hazards &= ~Hazard.EXPLOSIVE; } } 
+        }
+        public bool ThermalRunaway 
+        {
+            get => hazards.HasFlag(Hazard.THERMAL_RUNAWAY);
+            set { if (value) { hazards |= Hazard.THERMAL_RUNAWAY; } else { hazards &= ~Hazard.THERMAL_RUNAWAY; } } 
+        }
+        public bool GasRelease
+        {
+            get => hazards.HasFlag(Hazard.GAS_RELEASE);
+            set { if (value) { hazards |= Hazard.EYES; } else { hazards &= ~Hazard.EYES; } } 
+        }
+        public bool Malodorous
+        { 
+            get => hazards.HasFlag(Hazard.MALODOROUS);
+            set { if (value) { hazards |= Hazard.EYES; } else { hazards &= ~Hazard.EYES; } } 
+        }
+        public bool GasUnderPressure
+        {
+            get => hazards.HasFlag(Hazard.GAS_UNDER_PRESSURE);
+            set { if (value) { hazards |= Hazard.EYES; } else { hazards &= ~Hazard.EYES; } } 
+        }
 
         private List<string> hazardCodes = new List<string>();
         public List<string> HazardCodes 
@@ -65,11 +149,18 @@ namespace COSHH_Generator
             this.hazardCodes = hazardCodes;
             foreach (string hazardCode in hazardCodes)
             {
-                var hazard = Hazard.NONE;
+                Hazard hazard;
                 if (!HazardCodeMap.TryGetValue(hazardCode, out hazard))
                 {
-                    //Console.WriteLine("Cannot find code " + hazardCode);
-                    continue;
+                    foreach (string code in hazardCode.Split("+"))
+                    {
+                        var h1 = Hazard.NONE;
+                        if (!HazardCodeMap.TryGetValue(code, out h1))
+                        {
+                            continue;
+                        }
+                        hazard |= h1;
+                    }
                 }
                 hazards |= hazard;
             }
@@ -80,14 +171,20 @@ namespace COSHH_Generator
             this.precautionaryCodes = precautionaryCodes;
             foreach (string precautionaryCode in precautionaryCodes)
             {
-                var hazard = Hazard.NONE;
+                Hazard hazard;
                 if (!PrecautionaryCodeMap.TryGetValue(precautionaryCode, out hazard))
                 {
-                    //Console.WriteLine("Cannot find code " + precautionaryCode);
-                    continue;
+                    foreach (string code in precautionaryCode.Split("+"))
+                    {
+                        var h1 = Hazard.NONE;
+                        if (!PrecautionaryCodeMap.TryGetValue(code, out h1))
+                        {
+                            continue;
+                        }
+                        hazard |= h1;
+                    }
                 };
                 hazards |= hazard;
-
             }
         }
 
@@ -205,7 +302,8 @@ namespace COSHH_Generator
             {"H336"            , Hazard.INHALATION},               // May cause drowsiness or dizziness //UNSURE
             {"H340"            , Hazard.NONE},                     // May cause genetic defects
             {"H341"            , Hazard.NONE},                     // Suspected of causing genetic defects
-            {"H350"            , Hazard.NONE},                     // May cause cancer
+            {"H350"            , Hazard.NONE},                     // Suspected of causing genetic defects and May cause cancer
+            {"H341+H350"       , Hazard.NONE},                     // May cause cancer
             {"H350i"           , Hazard.INHALATION},               // May cause cancer by inhalation
             {"H351"            , Hazard.NONE},                     // Suspected of causing cancer
             {"H360"            , Hazard.NOT_USE_WHEN_PREGNANT},    // May damage fertility or the unborn child
@@ -301,6 +399,7 @@ namespace COSHH_Generator
             {"P304+P341"     , Hazard.INHALATION}, // IF INHALED: If breathing is difficult, remove victim to fresh air and keep at rest in a position comfortable for breathing.
             {"P305"          , Hazard.EYES}, // IF IN EYES:
             {"P305+P351+P338", Hazard.EYES}, // IF IN EYES: Rinse continuously with water for several minutes. Remove contact lenses if present and easy to do. Continue rinsing.
+            {"P305+P351+P338+P310", Hazard.EYES}, // IF IN EYES: Rinse continuously with water for several minutes. Remove contact lenses if present and easy to do. Continue rinsing.
             {"P306"          , Hazard.SKIN}, // IF ON CLOTHING:
             {"P306+P360"     , Hazard.SKIN}, // IF ON CLOTHING: Rinse immediately contaminated clothing and skin with plenty of water before removing clothes.
             {"P307"          , Hazard.NONE}, // IF exposed:

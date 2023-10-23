@@ -59,7 +59,6 @@ namespace COSHH_Generator.Scrapers
                     string content = await response.Content.ReadAsStringAsync();
                     var jtoken = JsonConvert.DeserializeObject<JToken>(HttpUtility.HtmlDecode(content))!;
                     var results = jtoken.SelectToken("data.getProductSearchResults.items")!.ToObject<List<Result>>()!;
-                    
                     return results;
                 }
                 else
@@ -74,38 +73,11 @@ namespace COSHH_Generator.Scrapers
             return new List<Result>();
         }
 
-        static public List<Result> Search(string query, bool print = false)
+        static public List<Result> Search(string query)
         {
             List<Result> results = SearchAsync(query).Result;
-            if (print)
-            {
-                PrintResults(results);
-            }
             return results;
-        }
-
-        static public async Task<SafetyData> SelectResult(List<Result> results, int resultIndex,int productIndex)
-        {
-            //Trace.WriteLine(results[resultIndex].products![productIndex].fullName);
-            string url = results[resultIndex].products![productIndex].link!;
-            return await SDSParser.Extract(url);
-        }
-
-        
-        public static void PrintResults(in List<Result> results)
-        {
-            for (int i = 0; i < results.Count; i++)
-            {
-                Result result = results[results.Count - i - 1];
-                Console.WriteLine($"{results.Count - i}.{result.name}");
-                for (int j = 0; j < result.products.Count; j++)
-                {
-                    Result.Product product = result.products[j];
-                    Console.WriteLine($"\t{j + 1}. {product.description}");
-                }
-                Console.WriteLine();
-            }
-        }
+        }       
 
         public class Result
         {
