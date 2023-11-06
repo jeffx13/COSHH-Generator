@@ -1,4 +1,5 @@
-﻿using COSHH_Generator.Scrapers;
+﻿using com.itextpdf.text.pdf;
+using COSHH_Generator.Scrapers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Shell;
 
 namespace COSHH_Generator
 {
@@ -91,6 +93,7 @@ namespace COSHH_Generator
         public void Search(in string query)
         {
             if (string.IsNullOrEmpty(query) || this.query == query) return;
+
             SigmaAldrich.SearchAsync(query, SetResults);
             
             //Trace.WriteLine("searhcing");
@@ -223,8 +226,6 @@ namespace COSHH_Generator
         public Task<SafetyData>? extractionTask = null;
         public event PropertyChangedEventHandler? PropertyChanged;
         internal void OnPropertyChanged([CallerMemberName] string propName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
-
-
         //public CancellationToken cancellationToken;   
     }
     struct Result
@@ -248,9 +249,6 @@ namespace COSHH_Generator
         {
             InitializeComponent();
             SDSParser.extract();
-
-
-
 
             AddNewSubstance();
             dateTextBox.Text = DateTime.Today.ToString("dd/MM/yyyy");
@@ -444,11 +442,19 @@ namespace COSHH_Generator
             {
                 Source = chemicalPool,
             });
-            
+            var ItemsPanel = new ItemsPanelTemplate();
+            var stackPanelTemplate = new FrameworkElementFactory(typeof(VirtualizingStackPanel));
+            ItemsPanel.VisualTree = stackPanelTemplate;
+            chemicalPoolComboBox.ItemsPanel = ItemsPanel;
+            chemicalPoolComboBox.PreviewMouseWheel += (sender, e) =>
+            {
+                e.Handled = !((ComboBox)sender).IsDropDownOpen;
+            };
+
             searchOrPoolRow.Children.Add(chemicalPoolComboBox);
             Grid.SetRow(chemicalPoolComboBox, 0);
             Grid.SetColumn(chemicalPoolComboBox, 2);
-            
+
             
 
 
@@ -497,6 +503,10 @@ namespace COSHH_Generator
             amountUnitComboBox.Items.Add("cm³");
             amountUnitComboBox.Items.Add("L");
             amountUnitComboBox.Margin = new Thickness(0, 0, 5, 5);
+            amountUnitComboBox.PreviewMouseWheel += (sender, e) => 
+            { 
+                e.Handled = !((ComboBox)sender).IsDropDownOpen;
+            };
             grid.Children.Add(amountUnitComboBox);
             Grid.SetRow(amountUnitComboBox, 1);
             Grid.SetColumn(amountUnitComboBox, 4);
@@ -519,6 +529,11 @@ namespace COSHH_Generator
             };
             resultsComboBox.DisplayMemberPath = "ProductName";
             resultsComboBox.Margin = new Thickness(0, 0, 5, 5);
+            resultsComboBox.PreviewMouseWheel += (sender, e) =>
+            {
+                e.Handled = !((ComboBox)sender).IsDropDownOpen;
+            };
+
             grid.Children.Add(resultsComboBox);
             Grid.SetRow(resultsComboBox, 2);
             Grid.SetColumn(resultsComboBox, 1);
@@ -614,14 +629,49 @@ namespace COSHH_Generator
                 substanceEntries.Last().UseChemicalPool = false;
             };
 
+            
             substanceListBox.Items.Insert(substanceListBox.Items.Count - 1, grid);
             
         }
+        void s_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
 
+            if (sender is ListBoxItem)
+            {
+                ListBoxItem draggedItem = sender as ListBoxItem;
+                DragDrop.DoDragDrop(draggedItem, draggedItem.DataContext, DragDropEffects.Move);
+                draggedItem.IsSelected = true;
+            }
+        }
+        void listbox1_Drop(object sender, DragEventArgs e)
+        {
+            var droppedData = e.Data.GetData(typeof(SubstanceEntry)) as SubstanceEntry;
+            SubstanceEntry target = ((ListBoxItem)(sender)).DataContext as SubstanceEntry;
+
+            int removedIdx = substanceListBox.Items.IndexOf(droppedData);
+            int targetIdx = substanceListBox.Items.IndexOf(target);
+
+            if (removedIdx < targetIdx)
+            {
+                substanceEntries.Insert(targetIdx + 1, droppedData);
+                substanceEntries.RemoveAt(removedIdx);
+            }
+            else
+            {
+                int remIdx = removedIdx + 1;
+                if (substanceEntries.Count + 1 > remIdx)
+                {
+                    substanceEntries.Insert(targetIdx, droppedData);
+                    substanceEntries.RemoveAt(remIdx);
+                }
+            }
+        }
         private void Clear(object? sender, RoutedEventArgs? e)
         {
             substanceEntries.Clear();
+            var delete = substanceListBox.Items[substanceListBox.Items.Count-1];
             substanceListBox.Items.Clear();
+            substanceListBox.Items.Add(delete);
             AddNewSubstance();
         }
 

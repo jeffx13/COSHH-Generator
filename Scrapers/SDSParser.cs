@@ -135,7 +135,7 @@ namespace COSHH_Generator.Scrapers
                 {
                     //TODO check for malodorous
                     pageText += PdfTextExtractor.GetTextFromPage(reader, page + 1).Split("SECTION 10").First();
-                    var odour = pageText.Split("c) Odor").Last().Split("d)").First().Split("Millipore").First().Trim();
+                    var odour = pageText.Split("c) Odor").Last().Split("d)").First().Split("Millipore").First().Split("  ").First().Replace("\n"," ").Trim();
                     if (odour.Contains("No data available"))
                     {
                         odour = "N/A";
