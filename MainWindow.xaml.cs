@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -82,10 +83,12 @@ namespace COSHH_Generator
         {
             set
             {
+                
                 Extract(value);
                 _SelectedResult = value;
-                DisplayName = value.SubstanceName;
+                DisplayName = value.SubstanceName;  
             }
+            
         }
         public SubstanceEntry? chemicalPoolSubstance = null;
 
@@ -215,7 +218,7 @@ namespace COSHH_Generator
 
         public void Extract(in Result substance)
         {
-            if(_tokenSource != null) _tokenSource.Cancel();
+            if (_tokenSource is not null) _tokenSource.Cancel();
             _tokenSource = new CancellationTokenSource();
             extractionTask = SDSParser.Extract(substance.Link, _tokenSource.Token, (odour) =>
             {
@@ -248,7 +251,7 @@ namespace COSHH_Generator
         public MainWindow()
         {
             InitializeComponent();
-            SDSParser.extract();
+            
 
             AddNewSubstance();
             dateTextBox.Text = DateTime.Today.ToString("dd/MM/yyyy");
