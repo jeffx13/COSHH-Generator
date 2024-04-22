@@ -9,6 +9,7 @@ namespace COSHH_Generator
     class SafetyData
     {
         private Hazard hazards = Hazard.NONE;
+        public string Odour;
         public bool Eyes 
         { 
             get => hazards.HasFlag(Hazard.EYES); 

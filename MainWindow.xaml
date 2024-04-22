@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:COSHH_Generator"
         mc:Ignorable="d"
-        Title="COSHH Generator By Jeff 杰夫" Height="720" Width="1080">
+        Title="COSHH Generator" Height="720" Width="1080">
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
