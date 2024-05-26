@@ -2,12 +2,22 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net7.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows7.0</TargetFramework>
         <RootNamespace>COSHH_Generator</RootNamespace>
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>icon.ico</ApplicationIcon>
     </PropertyGroup>
+	
+	
+	<PropertyGroup>
+		<PublishReadyToRun>true</PublishReadyToRun>
+	</PropertyGroup>
+	
+	
+    <ItemGroup>
+      <None Remove="data\spash.gif" />
+    </ItemGroup>
 
     <ItemGroup>
         <Content Include="icon.ico" />
@@ -26,7 +36,6 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="iTextSharp" Version="5.5.13.3" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 	
     <Target Name="CopyData" AfterTargets="AfterBuild">

@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:COSHH_Generator"
         mc:Ignorable="d"
+        
         Title="COSHH Generator" Height="720" Width="1080">
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.ColumnDefinitions>
@@ -57,10 +58,10 @@
         </Grid>
 
         <ListBox ScrollViewer.CanContentScroll="False" Name="substanceListBox" HorizontalContentAlignment="Stretch" KeyboardNavigation.TabNavigation ="Contained" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
-            <Button Click="OnAddNewSubstancePressed" Height="50"> Add New Substance</Button>
+            <Button Click="AddNewSubstance" Height="50"> Add New Substance</Button>
         </ListBox>
 
-        <Button Name="AddNewSubstanceButton" Grid.Row="2" Grid.Column="0" Click="OnAddNewSubstancePressed" IsTabStop="False">Add substance</Button>
+        <Button Name="AddNewSubstanceButton" Grid.Row="2" Grid.Column="0" Click="AddNewSubstance" IsTabStop="False">Add substance</Button>
         <Button Name="CLearButton" Grid.Row="2" Grid.Column="1" Click="Clear" IsTabStop="False">Clear</Button>
         <Button Name="generateButton" Grid.Row="2" Grid.Column="2" Click="Generate" IsTabStop="False">Generate</Button>
 
