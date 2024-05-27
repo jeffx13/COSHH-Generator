@@ -9,6 +9,7 @@ using System.Threading;
 using System.Text.Json;
 
 using System.Text.Json.Serialization;
+using System;
 
 namespace COSHH_Generator.Core
 {
@@ -18,7 +19,10 @@ namespace COSHH_Generator.Core
         private readonly static HttpClient Client = new HttpClient(new HttpClientHandler
         {
             UseProxy = false,
-        });
+        })
+        {
+            Timeout = TimeSpan.FromSeconds(3)
+        };
 
         static public async Task<List<Result>> SearchAsync(string query, CancellationToken cancelToken = default)
         {

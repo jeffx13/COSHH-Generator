@@ -4,8 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:COSHH_Generator"
-        xmlns:handlers="clr-namespace:COSHH_Generator"
-        mc:Ignorable="d"
+        mc:Ignorable="d" Loaded="onLoaded" ResizeMode="CanMinimize"
         Title="COSHH Generator" Height="720" Width="1080">
 
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -15,12 +14,13 @@
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="35.202"></RowDefinition>
-            <RowDefinition Height="493*"></RowDefinition>
-            <RowDefinition Height="35*"></RowDefinition>
-            <RowDefinition Height="141*"></RowDefinition>
+            <RowDefinition Height="3*" ></RowDefinition>
+            <RowDefinition Height="3*" ></RowDefinition>
+            <RowDefinition Height="50*"></RowDefinition>
+            <RowDefinition Height="3*"></RowDefinition>
+            <RowDefinition Height="10*"></RowDefinition>
         </Grid.RowDefinitions>
-
+        
         <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="0.05*"></ColumnDefinition>
@@ -29,57 +29,85 @@
                 <ColumnDefinition Width="0.15*"></ColumnDefinition>
                 <ColumnDefinition Width="0.05*"></ColumnDefinition>
                 <ColumnDefinition Width="0.15*"></ColumnDefinition>
-                <ColumnDefinition Width="0.05*"></ColumnDefinition>
-                <ColumnDefinition Width="0.05*"></ColumnDefinition>
-                <ColumnDefinition Width="0.05*"></ColumnDefinition>
-                <ColumnDefinition Width="0.10*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14">
                 Title:
             </TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14">
                 Name:
             </TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Grid.Row="0" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14">
                 College:
             </TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+            
+
+            <TextBox Margin="0,5,0,5" Name="TitleTextBox" Grid.Row="0" Grid.Column="1" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center" 
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=Title}" FontSize="14">
+            </TextBox>
+            <TextBox Margin="0,5,0,5" Name="NameTextBox" Grid.Row="0" Grid.Column="3" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"          
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=Name}" FontSize="14">
+            </TextBox>
+            <TextBox Margin="0,5,20,5" Name="CollegeTextBox" Grid.Row="0" Grid.Column="5" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center" 
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=College}" FontSize="14">
+            </TextBox>
+
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.04*"></ColumnDefinition> 
+                <ColumnDefinition Width="0.20*"></ColumnDefinition>
+                <ColumnDefinition Width="0.08*"></ColumnDefinition>
+                <ColumnDefinition Width="0.03*"></ColumnDefinition>
+                <ColumnDefinition Width="0.02*"></ColumnDefinition>
+                <ColumnDefinition Width="0.01*"></ColumnDefinition>
+                <ColumnDefinition Width="0.02*"></ColumnDefinition>
+                <ColumnDefinition Width="0.05*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            
+            <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14">
+            Output Name:
+            </TextBlock>
+            <TextBox Margin="0,5,15,5"  Name="OutputNameTextBox" Grid.Row="0" Grid.Column="1" 
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"  
+             MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=OutputName}" FontSize="14">
+            </TextBox>
+            
+            <TextBlock Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="14">
+            Connection Timeout (in ms):
+            </TextBlock>
+            <TextBox Margin="0,5,15,5"  Name="ConnectionTimeoutTextBox" Grid.Row="0" Grid.Column="3" 
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"  
+             MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=ConnectionTimeout}" FontSize="14">  
+            </TextBox>
+            
+            <TextBlock Grid.Row="0" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14">
                 Year:
             </TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBox Margin="0,5,0,5" Name="YearTextBox" Grid.Row="0" Grid.Column="5" 
+                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                 MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=Year}" FontSize="14">  
+            </TextBox>
+
+            <TextBlock Grid.Row="0" Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14">
                 Date:
             </TextBlock>
-
-            <TextBox Margin="0,5,0,5" Name="titleTextBox" Grid.Row="0" Grid.Column="1" 
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center" 
-                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox">
-            </TextBox>
-            <TextBox Margin="0,5,0,5" Name="nameTextBox" Grid.Row="0" Grid.Column="3" 
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"          
-                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox">
-            </TextBox>
-            <TextBox Margin="0,5,0,5" Name="collegeTextBox" Grid.Row="0" Grid.Column="5" 
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center" 
-                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox">
-            </TextBox>
-            <TextBox Margin="0,5,0,5" Name="yearTextBox" Grid.Row="0" Grid.Column="7" 
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
-                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox">
-            </TextBox>
-            <TextBox Margin="0,5,15,5"  Name="dateTextBox" Grid.Row="0" Grid.Column="9" 
+            <TextBox Margin="0,5,40,5"  Name="DateTextBox" Grid.Row="0" Grid.Column="7" 
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"  
-                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox">
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=Date}" FontSize="14">
             </TextBox>
 
         </Grid>
 
-        <ListBox ScrollViewer.CanContentScroll="False" Name="substanceListBox" HorizontalContentAlignment="Stretch" KeyboardNavigation.TabNavigation ="Contained" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+        <ListBox ScrollViewer.CanContentScroll="False" Name="substanceListBox" HorizontalContentAlignment="Stretch" KeyboardNavigation.TabNavigation ="Contained" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
             <Button Click="AddNewSubstance" Height="50"> Add New Substance</Button >
         </ListBox>
 
-        <Button Name="AddNewSubstanceButton" Grid.Row="2" Grid.Column="0" Click="AddNewSubstance" IsTabStop="False">Add substance</Button>
-        <Button Name="CLearButton" Grid.Row="2" Grid.Column="1" Click="Clear" IsTabStop="False">Clear</Button>
-        <Button Name="generateButton" Grid.Row="2" Grid.Column="2" Click="Generate" IsTabStop="False">Generate</Button>
+        <Button Name="AddNewSubstanceButton" Grid.Row="3" Grid.Column="0" Click="AddNewSubstance" IsTabStop="False">Add substance</Button>
+        <Button Name="CLearButton" Grid.Row="3" Grid.Column="1" Click="Clear" IsTabStop="False">Clear</Button>
+        <Button Name="generateButton" Grid.Row="3" Grid.Column="2" Click="Generate" IsTabStop="False">Generate</Button>
 
         <Grid Grid.Row="4" Grid.ColumnSpan="3">
             <Grid.ColumnDefinitions>
@@ -103,58 +131,62 @@
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0">
                     Fire or Explosion
                 </TextBlock>
-                <CheckBox Name="fireExplosionCheckBox" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
-                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" 
+                <CheckBox Name="FireExplosionCheckBox" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" IsChecked="{Binding FireExplosion, Mode=TwoWay}"
                           Focusable="False" IsTabStop="False"></CheckBox>
-                <TextBox Name="fireExplosionTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" IsEnabled="False"  
-                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" >
-                    Keep away from naked flames and sources of ignition.
+                <TextBox Name="FireExplosionTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" IsEnabled="False"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" 
+                         Text="{Binding FireExplosionText}">
                 </TextBox>
 
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0">
                 Thermal Runaway
                 </TextBlock>
-                <CheckBox Name="thermalRunawayCheckBox" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"
-                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" 
+                <CheckBox Name="ThermalRunawayCheckBox" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" IsChecked="{Binding ThermalRunaway, Mode=TwoWay}"
                           Focusable="False" IsTabStop="False"></CheckBox>
-                <TextBox Name="thermalRunawayTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" IsEnabled="False"  
-                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" >
-                    Dropwise addition by dropping funnel.
+                <TextBox Name="ThermalRunawayTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" IsEnabled="False"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" 
+                         Text="{Binding ThermalRunawayText}">
+                   
                 </TextBox>
 
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0">
                 Gas Release
                 </TextBlock>
-                <CheckBox Name="gasReleaseCheckBox" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1"
-                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" 
+                <CheckBox Name="GasReleaseCheckBox" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" IsChecked="{Binding GasRelease, Mode=TwoWay}"
                           Focusable="False" IsTabStop="False"></CheckBox>
-                <TextBox Name="gasReleaseTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="2" Grid.Column="2" IsEnabled="False"  
-                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" >
-                    Keep the fumehood sash pulled down.
+                <TextBox Name="GasReleaseTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="2" Grid.Column="2" IsEnabled="False"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" 
+                         Text="{Binding GasReleaseText}">
+                    
                 </TextBox>
 
 
 
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="3" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="3" Grid.Column="0" >
                     Malodorous Substances
                 </TextBlock>
-                <CheckBox Name="malodorousSubstancesCheckBox" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1"
-                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" 
+                <CheckBox Name="MalodorousSubstancesCheckBox" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" IsChecked="{Binding MalodorousSubstances, Mode=TwoWay}"
                           Focusable="False" IsTabStop="False"></CheckBox>
-                <TextBox Name="malodorousSubstancesTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="3" Grid.Column="2" IsEnabled="False"  
-                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" >
-                    Perform all reactions in fume hood where possible and keep the fumehood sash pulled down.
+                <TextBox Name="MalodorousSubstancesTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="3" Grid.Column="2" IsEnabled="False"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White"
+                         Text="{Binding MalodorousSubstancesText}">
+                    
                 </TextBox>
 
 
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="4" Grid.Column="0">
                 Special measures
                 </TextBlock>
-                <CheckBox Name="specialMeasuresCheckBox" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1"
-                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" 
+                <CheckBox Name="SpecialMeasuresCheckBox" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" IsChecked="{Binding SpecialMeasures, Mode=TwoWay}"
                           Focusable="False" IsTabStop="False"></CheckBox>
-                <TextBox Name="specialMeasuresTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="4" Grid.Column="2" IsEnabled="False"  
-                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" >
+                <TextBox Name="SpecialMeasuresTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="4" Grid.Column="2" IsEnabled="False"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" 
+                         Text="{Binding SpecialMeasuresText}">
                     
                 </TextBox>
 
@@ -176,40 +208,40 @@
                 Halogenated
                 </TextBlock>
                 <CheckBox Name="halogenatedCheckBox" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
-                          Focusable="False" IsTabStop="False">
+                          Focusable="False" IsTabStop="False" IsChecked="{Binding Halogenated, Mode=TwoWay}">
                 </CheckBox>
 
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0">
                 Hydrocarbon
                 </TextBlock>
                 <CheckBox Name="hydrocarbonCheckBox" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"
-                          Focusable="False" IsTabStop="False">
+                          Focusable="False" IsTabStop="False" IsChecked="{Binding Hydrocarbon, Mode=TwoWay}">
                 </CheckBox>
 
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0">
                 Contaminated solid waste
                 </TextBlock>
                 <CheckBox Name="contaminatedCheckBox" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1"
-                          Focusable="False" IsTabStop="False">
+                          Focusable="False" IsTabStop="False" IsChecked="{Binding Contaminated, Mode=TwoWay}">
                 </CheckBox>
 
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="3" Grid.Column="0">
                 Aqueous
                 </TextBlock>
                 <CheckBox Name="aqueousCheckBox" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1"
-                          Focusable="False" IsTabStop="False">
+                          Focusable="False" IsTabStop="False" IsChecked="{Binding Aqueous, Mode=TwoWay}">
                 </CheckBox>
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="4" Grid.Column="0">
                 Named Waste
                 </TextBlock>
                 <CheckBox Name="namedWasteCheckBox" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1"
-                          Focusable="False" IsTabStop="False">
+                          Focusable="False" IsTabStop="False" IsChecked="{Binding Named, Mode=TwoWay}">
                 </CheckBox>
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="5" Grid.Column="0">
                 Silica/TLC
                 </TextBlock>
                 <CheckBox Name="silicaTLCCheckBox" VerticalAlignment="Center" Grid.Row="5" Grid.Column="1"
-                          Focusable="False" IsTabStop="False">
+                          Focusable="False" IsTabStop="False" IsChecked="{Binding SilicaTLC, Mode=TwoWay}">
                 </CheckBox>
 
 

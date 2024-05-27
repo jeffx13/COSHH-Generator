@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:COSHH_Generator"
-             Width="1000" Height="Auto">
+             Width="1000" Height="Auto" >
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -32,11 +32,11 @@
 
             <RadioButton x:Name="SearchRadioButton"
                          Grid.Row="0" Grid.Column="0"
-                         IsChecked="True">
+                         IsChecked="True" IsTabStop="False" Focusable="False">
                 <TextBlock Text="Search" />
             </RadioButton>
             <RadioButton x:Name="UsePoolRadioButton"
-                         Grid.Row="0" Grid.Column="1">
+                         Grid.Row="0" Grid.Column="1" IsTabStop="False" Focusable="False">
             <TextBlock Text="Use Pool" />
             </RadioButton>
             <ComboBox x:Name="ChemicalPoolComboBox"
@@ -56,7 +56,8 @@
 
         <!-- Search Query Label and TextBox -->
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Query:" Focusable="False" />
-        <TextBox x:Name="SearchQueryTextBox" Grid.Row="1" Grid.Column="1" Margin="0,0,10,5" />
+        <TextBox x:Name="SearchQueryTextBox" Grid.Row="1" Grid.Column="1" Margin="0,0,10,5"  
+                 MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox"/>
 
         <!-- Amount Label and TextBox -->
         <TextBlock Grid.Row="1" Grid.Column="2" Text="Mass/Volume:" />
@@ -71,7 +72,7 @@
                   Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4"
                   ItemsSource="{Binding Results}"
                   DisplayMemberPath="ProductName"
-                  Margin="0,0,5,5"
+                  Margin="0,0,5,5" IsEnabled="False"
                   />
         
         <!-- Display Name and Odour Grid -->
@@ -89,7 +90,7 @@
                      MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox"/>
             <TextBlock Grid.Column="2" Text="Odour: " />
             <TextBox x:Name="OdourTextBox" Grid.Column="3" IsReadOnly="True" Margin="0,0,5,0" 
-                     Text="{Binding Path=Odour}"
+                     Text="{Binding Path=Odour, Mode=OneWay}"
                      MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox"/>
         </Grid>
 

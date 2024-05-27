@@ -11,6 +11,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using COSHH_Generator.Core;
+using static COSHH_Generator.Core.SigmaAldrich;
+using System.Linq;
 
 
 namespace COSHH_Generator
@@ -55,15 +57,9 @@ namespace COSHH_Generator
             }
         }
 
-        private string _Odour = "";
         public string Odour
         {
-            get => _Odour;
-            set
-            {
-                _Odour = value;
-                OnPropertyChanged("Odour");
-            }
+            get => _safetyData != null ? _safetyData.Odour : extractionTask != null ? "Extracting..." : "";
         }
 
         public Task<SafetyData>? extractionTask = null;
@@ -77,13 +73,21 @@ namespace COSHH_Generator
 
         }
 
+        public void invalidateResult(string link)
+        {
+            var found = _Results.FirstOrDefault(x => x.Link == link);
+            found.Link = null;
+            Trace.WriteLine(_Results.FirstOrDefault(x => x.Link == null));
+            OnPropertyChanged("Results");
+        }
+
         public void SetResults(List<SigmaAldrich.Result> results)
         {
             Trace.WriteLine("Setting results");
             _Results.Clear();
             if (results.Count == 0)
             {
-                _Results.Add(new Result { ProductName = "No Results" });
+                _Results.Add(new Result { ProductName = "No Results", Link = null});
                 return;
             }
 
@@ -109,15 +113,34 @@ namespace COSHH_Generator
             OnPropertyChanged("Results");
         }
 
-        public SafetyData? safetyData = null;
+        private SafetyData? _safetyData = null;
+        public SafetyData? safetyData
+        {
+            get => _safetyData;
+            set
+            {
+                _safetyData = value;
+                OnPropertyChanged("Odour");
+            }
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
         internal void OnPropertyChanged([CallerMemberName] string propName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
     }
-    public struct Result
+    public class Result: INotifyPropertyChanged
     {
         public string SubstanceName { get; set; }
         public string ProductName { get; set; }
-        public string? Link { get; set; }
+        public string? Link {
+            get => _Link;
+            set  
+            {
+                _Link = value;
+                OnPropertyChanged("IsSelectable");
+            }
+        }
+        private string? _Link = null;
+
         public bool IsSelectable
         {
             get
@@ -125,6 +148,9 @@ namespace COSHH_Generator
                 return Link != null;
             }
         }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        internal void OnPropertyChanged([CallerMemberName] string propName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
 
     }
 
@@ -138,15 +164,11 @@ namespace COSHH_Generator
             Bind();
         }
 
-        public async void Search(string query)
+        private async void Search(string query)
         {
             query = query.Trim();
-            if (currentQuery == query) return;
-            else if (string.IsNullOrEmpty(query))
-            {
-                substanceEntry.SetResults(new List<SigmaAldrich.Result>());
-                return;
-            }
+            if (currentQuery == query || string.IsNullOrEmpty(query)) return;
+            
             // Cancel the current search task
             if (searchTask is not null)
             {
@@ -156,20 +178,28 @@ namespace COSHH_Generator
             }
             // Initiate new search task
             currentQuery = query;
-            substanceEntry.DisplayName = query;
             searchTokenSource = new CancellationTokenSource();
 
             searchTask = Task.Run(() => SigmaAldrich.SearchAsync(query, searchTokenSource.Token));
             List<SigmaAldrich.Result> results = await searchTask;
             substanceEntry.SetResults(results);
-            ResultsComboBox.IsDropDownOpen = true;
-            ResultsComboBox.Focus();
+            
+            if (results.Any())
+            {
+                ResultsComboBox.IsEnabled = true;
+                ResultsComboBox.IsDropDownOpen = true;
+                ResultsComboBox.Focus();
+            } else
+            {
+                ResultsComboBox.SelectedIndex = 0;
+                ResultsComboBox.IsEnabled = false;
+            }
             searchTask = null;
             searchTokenSource!.Dispose();
 
         }
 
-        private async void Extract(Result substance)
+        private async void Extract(Result substanceResult)
         {
             if (substanceEntry.extractionTask is not null)
             {
@@ -178,32 +208,30 @@ namespace COSHH_Generator
                 extractionTokenSource!.Dispose();
             }
 
-            substanceEntry.Odour = "";
             substanceEntry.safetyData = null;
             extractionTokenSource = new CancellationTokenSource();
             bool success = true;
-            substanceEntry.extractionTask = Task.Run(() => SDSParser.Extract(substance.Link!, extractionTokenSource.Token,
+            substanceEntry.extractionTask = Task.Run(() => SDSParser.Extract(substanceResult.Link!, extractionTokenSource.Token,
                 () => {
                     success = false;
                 }));
-            
-            var safetyData = await substanceEntry.extractionTask;
+
+            substanceEntry.safetyData = await substanceEntry.extractionTask;
             substanceEntry.extractionTask = null;
             extractionTokenSource!.Dispose();
-            if (success)
+            
+            if (!success)
             {
-                substanceEntry.safetyData = safetyData;
-                substanceEntry.DisplayName = substance.SubstanceName;
-                substanceEntry.Odour = substanceEntry.safetyData.Odour;
-            } else
-            {
-                MessageBox.Show($"Failed to extract {substance.ProductName}", "Extraction Failure", MessageBoxButton.OK);
+                MessageBox.Show($"Failed to extract \"{substanceResult.ProductName}\"", "Extraction Failure", MessageBoxButton.OK);
+                if (_SelectedResult != null)
+                {
+                    substanceEntry.invalidateResult(_SelectedResult.Link!);
+                }
                 _SelectedResult = null;
+
                 substanceEntry.DisplayName = "";
                 ResultsComboBox.SelectedIndex = -1;
-            }
-            
-            
+            } 
         }
 
         private void Bind()
@@ -216,7 +244,6 @@ namespace COSHH_Generator
                 }
             };
 
-            
             ResultsComboBox.ItemContainerStyle = new Style(typeof(ComboBoxItem))
             {
                 Setters =
@@ -246,13 +273,9 @@ namespace COSHH_Generator
                 Search(SearchQueryTextBox.Text);
             };
 
-            SearchQueryTextBox.MouseEnter += (s, e) => Mouse.OverrideCursor = Cursors.IBeam;
-            SearchQueryTextBox.MouseLeave += (s, e) => Mouse.OverrideCursor = Cursors.Arrow;
-
             ChemicalPoolComboBox.SelectionChanged += (sender, args) =>
             {
                 var addedItems = args.AddedItems;
-                
                 if (addedItems.Count > 0)
                 {
                     var chemicalPoolSubstance = (SubstanceEntry)args.AddedItems[0]!;
@@ -273,6 +296,7 @@ namespace COSHH_Generator
             ChemicalPoolComboBox.PreviewKeyDown += ChemicalPoolComboBox_PreviewKeyDown;
             ChemicalPoolComboBox.PreviewMouseWheel += (s, e) => { e.Handled = !((ComboBox)s).IsDropDownOpen; };
             ResultsComboBox.PreviewMouseWheel += (s, e) => { e.Handled = !((ComboBox)s).IsDropDownOpen; };
+
         }
 
         private void ChemicalPoolComboBox_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -294,8 +318,16 @@ namespace COSHH_Generator
             ChemicalPoolComboBox.IsEnabled = false;
             SearchQueryTextBox.IsEnabled = true;
             ResultsComboBox.IsEnabled = true;
-            DisplayNameTextBox.Clear();
-            AmountTextBox.Clear();
+
+            substanceEntry.safetyData = null;
+            substanceEntry.Amount = "";
+            
+            if (_SelectedResult != null && cachedSafetyData != null)
+            {
+                substanceEntry.DisplayName = _SelectedResult.SubstanceName;
+                substanceEntry.safetyData = cachedSafetyData;
+            }
+            
         }
 
         private void UsePoolRadioButton_Checked(object sender, RoutedEventArgs e)
@@ -303,7 +335,12 @@ namespace COSHH_Generator
             ChemicalPoolComboBox.IsEnabled = true;
             SearchQueryTextBox.IsEnabled = false;
             ResultsComboBox.IsEnabled = false;
- 
+            
+            if (_SelectedResult != null)
+            {
+                cachedSafetyData = substanceEntry.safetyData;
+            }
+
             if (ChemicalPoolComboBox.ItemsSource == null)
             {
                 ChemicalPoolComboBox.SetBinding(ComboBox.ItemsSourceProperty, new Binding("Substances")
@@ -311,8 +348,15 @@ namespace COSHH_Generator
                     Source = chemicalPool.Value,
                 });
             }
-            // Assuming `substanceEntries` and `substance` are defined and accessible in your context
-            // substanceEntries.Last().UseChemicalPool = true;
+            
+            if (ChemicalPoolComboBox.SelectedIndex != -1)
+            {
+                var chemicalPoolSubstance = (SubstanceEntry) ChemicalPoolComboBox.SelectedItem;
+                substanceEntry.safetyData = chemicalPoolSubstance.safetyData;
+                substanceEntry.DisplayName = chemicalPoolSubstance.DisplayName;
+                substanceEntry.Amount = chemicalPoolSubstance.Amount;
+            }
+            
         }
 
         private void onEnterTextBox(object sender, MouseEventArgs e)
@@ -345,12 +389,15 @@ namespace COSHH_Generator
         {
             set
             {
-               Extract(value);
-               _SelectedResult = value;
-               substanceEntry.DisplayName = value.SubstanceName;
+                if (value.Link == null) return;
+                Extract(value);
+                _SelectedResult = value;
+                substanceEntry.DisplayName = value.SubstanceName;
             }
         }
 
-        
+        private SafetyData? cachedSafetyData = null;
+
+
     }
 }

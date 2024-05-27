@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Net;
 using System.Windows;
+using System.Reflection;
 
 namespace COSHH_Generator.Core
 {
@@ -18,10 +19,14 @@ namespace COSHH_Generator.Core
         private static Regex HazardStatementRegex = new Regex(@"^H\d{3}[dfDFi]{0,2}(?:\s?\+\s?H\d{3}){0,2}", RegexOptions.Multiline);
         private static Regex PrecautionaryStatementRegex = new Regex(@"P\d{3}(?:\s?\+\s?P\d{3}){0,2}", RegexOptions.Multiline);
         private static Regex EUHazardStatementRegex = new Regex(@"EUH\d{3}A?", RegexOptions.Multiline);
-        private static HttpClient client = new HttpClient()
+        public readonly static HttpClient Client = new HttpClient(new HttpClientHandler
         {
-            Timeout = TimeSpan.FromSeconds(3)
+            UseProxy = false,
+        })
+        {
+            Timeout = TimeSpan.FromMilliseconds(10000)
         };
+        
 
         public static async Task<SafetyData> Extract(string url, CancellationToken cancelToken, Action errorCallback)
         {
@@ -34,14 +39,14 @@ namespace COSHH_Generator.Core
 
             try
             {
-                HttpResponseMessage response = await client.GetAsync(url);
+                HttpResponseMessage response = await Client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     errorCallback();
+                    Trace.WriteLine(response.StatusCode);
                     return safetyData;
                 }
                 
-                //PdfReader reader = await Task.Run(() => new PdfReader(new Uri(url)));
                 PdfReader reader = new PdfReader(await response.Content.ReadAsStreamAsync());
                 Trace.WriteLine("Extracting");
 
