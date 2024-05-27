@@ -59,10 +59,19 @@ namespace COSHH_Generator
 
         public string Odour
         {
-            get => _safetyData != null ? _safetyData.Odour : extractionTask != null ? "Extracting..." : "";
+            get => _safetyData != null ? _safetyData.Odour : _extractionTask != null ? "Extracting..." : "";
         }
 
-        public Task<SafetyData>? extractionTask = null;
+        private Task<SafetyData>? _extractionTask = null;
+        public Task<SafetyData>? ExtractionTask {
+            get => _extractionTask;
+            set
+            {
+                _extractionTask = value;
+                OnPropertyChanged("Odour");
+            }
+        }
+
         private ObservableCollection<Result> _Results = new ObservableCollection<Result>();
         public ObservableCollection<Result> Results
         {
@@ -201,23 +210,23 @@ namespace COSHH_Generator
 
         private async void Extract(Result substanceResult)
         {
-            if (substanceEntry.extractionTask is not null)
+            if (substanceEntry.ExtractionTask is not null)
             {
                 extractionTokenSource!.Cancel();
-                substanceEntry.extractionTask.Wait();
+                substanceEntry.ExtractionTask.Wait();
                 extractionTokenSource!.Dispose();
             }
 
             substanceEntry.safetyData = null;
             extractionTokenSource = new CancellationTokenSource();
             bool success = true;
-            substanceEntry.extractionTask = Task.Run(() => SDSParser.Extract(substanceResult.Link!, extractionTokenSource.Token,
+            substanceEntry.ExtractionTask = Task.Run(() => SDSParser.Extract(substanceResult.Link!, extractionTokenSource.Token,
                 () => {
                     success = false;
                 }));
 
-            substanceEntry.safetyData = await substanceEntry.extractionTask;
-            substanceEntry.extractionTask = null;
+            substanceEntry.safetyData = await substanceEntry.ExtractionTask;
+            substanceEntry.ExtractionTask = null;
             extractionTokenSource!.Dispose();
             
             if (!success)

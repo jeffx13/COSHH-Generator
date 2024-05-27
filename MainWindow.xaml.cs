@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,7 +15,6 @@ namespace COSHH_Generator
     
     public partial class MainWindow : Window
     {
-        
         private string cachePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, ".cache");
         List<SubstanceEntry> substanceEntries = new List<SubstanceEntry>();
         Config config = new Config();
@@ -97,7 +94,7 @@ namespace COSHH_Generator
             generateButton.IsEnabled = false;
             for (int i = 0; i < substanceEntries.Count; i++)
             {
-                if (substanceEntries[i].extractionTask == null && substanceEntries[i].safetyData == null)
+                if (substanceEntries[i].ExtractionTask == null && substanceEntries[i].safetyData == null)
                 {
                     if (string.IsNullOrEmpty(substanceEntries[i].DisplayName))
                     {

@@ -135,7 +135,7 @@ namespace COSHH_Generator.Core
                     {
                         if (substanceEntry.safetyData == null)
                         {
-                            await substanceEntry.extractionTask!;
+                            await substanceEntry.ExtractionTask!;
                             await Task.Delay(100);
                         }
                         if (substanceEntry.safetyData == null)
