@@ -4,9 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:COSHH_Generator"
+        xmlns:handlers="clr-namespace:COSHH_Generator"
         mc:Ignorable="d"
-        
         Title="COSHH Generator" Height="720" Width="1080">
+
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
@@ -49,16 +50,31 @@
                 Date:
             </TextBlock>
 
-            <TextBox Margin="0,5,0,5" Name="titleTextBox" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"></TextBox>
-            <TextBox Margin="0,5,0,5" Name="nameTextBox" Grid.Row="0" Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"></TextBox>
-            <TextBox Margin="0,5,0,5" Name="collegeTextBox" Grid.Row="0" Grid.Column="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"></TextBox>
-            <TextBox Margin="0,5,0,5" Name="yearTextBox" Grid.Row="0" Grid.Column="7" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"></TextBox>
-            <TextBox Margin="0,5,15,5"  Name="dateTextBox" Grid.Row="0" Grid.Column="9" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"></TextBox>
+            <TextBox Margin="0,5,0,5" Name="titleTextBox" Grid.Row="0" Grid.Column="1" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center" 
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox">
+            </TextBox>
+            <TextBox Margin="0,5,0,5" Name="nameTextBox" Grid.Row="0" Grid.Column="3" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"          
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox">
+            </TextBox>
+            <TextBox Margin="0,5,0,5" Name="collegeTextBox" Grid.Row="0" Grid.Column="5" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center" 
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox">
+            </TextBox>
+            <TextBox Margin="0,5,0,5" Name="yearTextBox" Grid.Row="0" Grid.Column="7" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox">
+            </TextBox>
+            <TextBox Margin="0,5,15,5"  Name="dateTextBox" Grid.Row="0" Grid.Column="9" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox">
+            </TextBox>
 
         </Grid>
 
         <ListBox ScrollViewer.CanContentScroll="False" Name="substanceListBox" HorizontalContentAlignment="Stretch" KeyboardNavigation.TabNavigation ="Contained" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
-            <Button Click="AddNewSubstance" Height="50"> Add New Substance</Button>
+            <Button Click="AddNewSubstance" Height="50"> Add New Substance</Button >
         </ListBox>
 
         <Button Name="AddNewSubstanceButton" Grid.Row="2" Grid.Column="0" Click="AddNewSubstance" IsTabStop="False">Add substance</Button>
@@ -84,46 +100,63 @@
                     <ColumnDefinition Width="0.035*"></ColumnDefinition>
                     <ColumnDefinition Width="0.715*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0">
                     Fire or Explosion
                 </TextBlock>
-                <CheckBox Name="fireExplosionCheckBox" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"></CheckBox>
-                <TextBox Name="fireExplosionTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" IsEnabled="False">
+                <CheckBox Name="fireExplosionCheckBox" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" 
+                          Focusable="False" IsTabStop="False"></CheckBox>
+                <TextBox Name="fireExplosionTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="0" Grid.Column="2" IsEnabled="False"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" >
                     Keep away from naked flames and sources of ignition.
                 </TextBox>
 
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0">
                 Thermal Runaway
                 </TextBlock>
-                <CheckBox Name="thermalRunawayCheckBox" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"></CheckBox>
-                <TextBox Name="thermalRunawayTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" IsEnabled="False">
+                <CheckBox Name="thermalRunawayCheckBox" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" 
+                          Focusable="False" IsTabStop="False"></CheckBox>
+                <TextBox Name="thermalRunawayTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="1" Grid.Column="2" IsEnabled="False"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" >
                     Dropwise addition by dropping funnel.
                 </TextBox>
 
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0">
                 Gas Release
                 </TextBlock>
-                <CheckBox Name="gasReleaseCheckBox" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1"></CheckBox>
-                <TextBox Name="gasReleaseTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="2" Grid.Column="2" IsEnabled="False">
+                <CheckBox Name="gasReleaseCheckBox" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" 
+                          Focusable="False" IsTabStop="False"></CheckBox>
+                <TextBox Name="gasReleaseTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="2" Grid.Column="2" IsEnabled="False"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" >
                     Keep the fumehood sash pulled down.
                 </TextBox>
 
 
 
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="3" Grid.Column="0">
                     Malodorous Substances
                 </TextBlock>
-                <CheckBox Name="malodorousSubstancesCheckBox" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1"></CheckBox>
-                <TextBox Name="malodorousSubstancesTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="3" Grid.Column="2" IsEnabled="False">
+                <CheckBox Name="malodorousSubstancesCheckBox" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" 
+                          Focusable="False" IsTabStop="False"></CheckBox>
+                <TextBox Name="malodorousSubstancesTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="3" Grid.Column="2" IsEnabled="False"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" >
                     Perform all reactions in fume hood where possible and keep the fumehood sash pulled down.
                 </TextBox>
-                
 
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0">
+
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="4" Grid.Column="0">
                 Special measures
                 </TextBlock>
-                <CheckBox Name="specialMeasuresCheckBox" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1"></CheckBox>
-                <TextBox Name="specialMeasuresTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="4" Grid.Column="2" IsEnabled="False"></TextBox>
+                <CheckBox Name="specialMeasuresCheckBox" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" 
+                          Focusable="False" IsTabStop="False"></CheckBox>
+                <TextBox Name="specialMeasuresTextBox" Margin="0,0,10,0" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="4" Grid.Column="2" IsEnabled="False"  
+                     MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" BorderThickness="0" Background="White" >
+                    
+                </TextBox>
 
             </Grid>
             <Grid Grid.Column="1">
@@ -139,38 +172,44 @@
                     <ColumnDefinition Width="0.8*"></ColumnDefinition>
                     <ColumnDefinition Width="0.2*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0">
                 Halogenated
                 </TextBlock>
-                <CheckBox Name="halogenatedCheckBox" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1">
+                <CheckBox Name="halogenatedCheckBox" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
+                          Focusable="False" IsTabStop="False">
                 </CheckBox>
 
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0">
                 Hydrocarbon
                 </TextBlock>
-                <CheckBox Name="hydrocarbonCheckBox" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1">
+                <CheckBox Name="hydrocarbonCheckBox" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"
+                          Focusable="False" IsTabStop="False">
                 </CheckBox>
 
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0">
                 Contaminated solid waste
                 </TextBlock>
-                <CheckBox Name="contaminatedCheckBox" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1">
+                <CheckBox Name="contaminatedCheckBox" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1"
+                          Focusable="False" IsTabStop="False">
                 </CheckBox>
 
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="3" Grid.Column="0">
                 Aqueous
                 </TextBlock>
-                <CheckBox Name="aqueousCheckBox" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1">
+                <CheckBox Name="aqueousCheckBox" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1"
+                          Focusable="False" IsTabStop="False">
                 </CheckBox>
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="4" Grid.Column="0">
                 Named Waste
                 </TextBlock>
-                <CheckBox Name="namedWasteCheckBox" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1">
+                <CheckBox Name="namedWasteCheckBox" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1"
+                          Focusable="False" IsTabStop="False">
                 </CheckBox>
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="5" Grid.Column="0">
                 Silica/TLC
                 </TextBlock>
-                <CheckBox Name="silicaTLCCheckBox" VerticalAlignment="Center" Grid.Row="5" Grid.Column="1">
+                <CheckBox Name="silicaTLCCheckBox" VerticalAlignment="Center" Grid.Row="5" Grid.Column="1"
+                          Focusable="False" IsTabStop="False">
                 </CheckBox>
 
 

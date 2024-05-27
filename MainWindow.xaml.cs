@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,25 +14,13 @@ namespace COSHH_Generator
 {
     public partial class MainWindow : Window
     {
-        Task? generateTask = null;
+        Task<string>? generateTask = null;
         string cachePath;
         List<SubstanceEntry> substanceEntries = new List<SubstanceEntry>();
         
         public MainWindow()
         {
-            Task.Run(() => SigmaAldrich.SearchAsync("HCl"));
             InitializeComponent();
-            yearTextBox.MouseEnter    += (s, e) => Mouse.OverrideCursor = Cursors.IBeam;
-            yearTextBox.MouseLeave    += (s, e) => Mouse.OverrideCursor = Cursors.Arrow;
-            collegeTextBox.MouseEnter += (s, e) => Mouse.OverrideCursor = Cursors.IBeam;
-            collegeTextBox.MouseLeave += (s, e) => Mouse.OverrideCursor = Cursors.Arrow;
-            nameTextBox.MouseEnter    += (s, e) => Mouse.OverrideCursor = Cursors.IBeam;
-            nameTextBox.MouseLeave    += (s, e) => Mouse.OverrideCursor = Cursors.Arrow;
-            titleTextBox.MouseEnter   += (s, e) => Mouse.OverrideCursor = Cursors.IBeam;
-            titleTextBox.MouseLeave   += (s, e) => Mouse.OverrideCursor = Cursors.Arrow;
-            dateTextBox.MouseEnter    += (s, e) => Mouse.OverrideCursor = Cursors.IBeam;
-            dateTextBox.MouseLeave    += (s, e) => Mouse.OverrideCursor = Cursors.Arrow;
-
             AddNewSubstance();
             dateTextBox.Text = DateTime.Today.ToString("dd/MM/yyyy");
             cachePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, ".cache");
@@ -47,52 +36,6 @@ namespace COSHH_Generator
             substanceListBox.SelectionChanged += (sender, e) =>
             {
                 substanceListBox.UnselectAll();
-            };
-
-            fireExplosionCheckBox.Checked += (sender, e) =>
-            {
-                fireExplosionTextBox.IsEnabled = true;
-            };
-            fireExplosionCheckBox.Unchecked += (sender, e) =>
-            {
-                fireExplosionTextBox.IsEnabled = false;
-            };
-
-            thermalRunawayCheckBox.Checked += (sender, e) =>
-            {
-                thermalRunawayTextBox.IsEnabled = true;
-            };
-            thermalRunawayCheckBox.Unchecked += (sender, e) =>
-            {
-                thermalRunawayTextBox.IsEnabled = false;
-            };
-
-            gasReleaseCheckBox.Checked += (sender, e) =>
-            {
-                gasReleaseTextBox.IsEnabled = true;
-            };
-            gasReleaseCheckBox.Unchecked += (sender, e) =>
-            {
-                gasReleaseTextBox.IsEnabled = false;
-            };
-
-            malodorousSubstancesCheckBox.Checked += (sender, e) =>
-            {
-                malodorousSubstancesTextBox.IsEnabled = true;
-            };
-            malodorousSubstancesCheckBox.Unchecked += (sender, e) =>
-            {
-                malodorousSubstancesTextBox.IsEnabled = false;
-            };
-
-
-            specialMeasuresCheckBox.Checked += (sender, e) =>
-            {
-                specialMeasuresTextBox.IsEnabled = true;
-            };
-            specialMeasuresCheckBox.Unchecked += (sender, e) =>
-            {
-                specialMeasuresTextBox.IsEnabled = false;
             };
 
             try
@@ -128,21 +71,47 @@ namespace COSHH_Generator
             substanceListBox.Items.Add(delete);
             AddNewSubstance();
         }
-
         
-        private void Generate(object? sender, RoutedEventArgs? e)
+
+
+        private async void Generate(object? sender, RoutedEventArgs? e)
         {
             generateButton.IsEnabled = false;
+
+
+            for (int i = 0; i < substanceEntries.Count; i++)
+            {
+                if (substanceEntries[i].extractionTask == null && substanceEntries[i].safetyData == null)
+                {
+                    if (string.IsNullOrEmpty(substanceEntries[i].DisplayName))
+                    {
+                        substanceListBox.Items.RemoveAt(i);
+                        substanceEntries.RemoveAt(i--);
+                    } 
+                }
+            }
+            if (substanceEntries.Count == 0)
+            {
+                generateButton.IsEnabled = true;
+                return;
+            }
+            for (int i = 0; i < substanceEntries.Count; i++)
+            {
+                if (substanceEntries[i].extractionTask == null && substanceEntries[i].safetyData == null)
+                {
+                    generateButton.IsEnabled = true;
+                    MessageBox.Show($"Product is not selected for {substanceEntries[i].DisplayName} at index {i}", "Generation Error", MessageBoxButton.OK);
+                    return;
+                }
+            }
+
             string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "COSHH.docx");
+            
             generateTask = COSHHForm.Generate(titleTextBox.Text, nameTextBox.Text, collegeTextBox.Text, yearTextBox.Text, dateTextBox.Text,
                 fireExplosionCheckBox.IsChecked, thermalRunawayCheckBox.IsChecked, gasReleaseCheckBox.IsChecked, malodorousSubstancesCheckBox.IsChecked, specialMeasuresCheckBox.IsChecked,
                 fireExplosionTextBox.Text, thermalRunawayTextBox.Text, gasReleaseTextBox.Text, malodorousSubstancesTextBox.Text, specialMeasuresTextBox.Text,
                 halogenatedCheckBox.IsChecked, hydrocarbonCheckBox.IsChecked, contaminatedCheckBox.IsChecked, aqueousCheckBox.IsChecked, namedWasteCheckBox.IsChecked, silicaTLCCheckBox.IsChecked,
-                substanceEntries, path, () =>
-                {
-                    generateButton.IsEnabled = true;
-                    generateTask = null;
-                });
+                substanceEntries, path);
             
             using (StreamWriter sw = new StreamWriter(File.Open(cachePath, FileMode.OpenOrCreate)))
             {
@@ -152,10 +121,54 @@ namespace COSHH_Generator
             {
                 File.SetAttributes(cachePath, FileAttributes.Hidden);
             }
-            
+
+            string generationResult = await generateTask;
+            if (generationResult != "")
+            {
+                MessageBox.Show(generationResult, "Generation Error", MessageBoxButton.OK);
+            }
+            generateButton.IsEnabled = true;
+            generateTask = null;
         }
-        
+
+        private void onEnterTextBox(object sender, MouseEventArgs e)
+        {
+            Mouse.OverrideCursor = Cursors.IBeam;
+        }
+
+        private void onLeaveTextBox(object sender, MouseEventArgs e)
+        {
+            Mouse.OverrideCursor = Cursors.Arrow;
+        }
+
+        private void onCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox)
+            {
+                bool isEnabled = checkBox.IsChecked == true;
+
+                switch (checkBox.Name)
+                {
+                    case "fireExplosionCheckBox":
+                        fireExplosionTextBox.IsEnabled = isEnabled;
+                        break;
+                    case "thermalRunawayCheckBox":
+                        thermalRunawayTextBox.IsEnabled = isEnabled;
+                        break;
+                    case "gasReleaseCheckBox":
+                        gasReleaseTextBox.IsEnabled = isEnabled;
+                        break;
+                    case "malodorousSubstancesCheckBox":
+                        malodorousSubstancesTextBox.IsEnabled = isEnabled;
+                        break;
+                    case "specialMeasuresCheckBox":
+                        specialMeasuresTextBox.IsEnabled = isEnabled;
+                        break;
+                }
+            }
+        }
     }
+
 
 
 

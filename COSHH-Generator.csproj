@@ -9,15 +9,9 @@
         <ApplicationIcon>icon.ico</ApplicationIcon>
     </PropertyGroup>
 	
-	
 	<PropertyGroup>
 		<PublishReadyToRun>true</PublishReadyToRun>
 	</PropertyGroup>
-	
-	
-    <ItemGroup>
-      <None Remove="data\spash.gif" />
-    </ItemGroup>
 
     <ItemGroup>
         <Content Include="icon.ico" />
@@ -28,9 +22,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-    
-        <PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
-    
+        <PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" /> 
         <PackageReference Include="Fody" Version="6.8.0">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
