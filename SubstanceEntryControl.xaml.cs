@@ -90,6 +90,28 @@ namespace COSHH_Generator
             OnPropertyChanged("Results");
         }
 
+        public void SetResults(List<Fisher.Result> results)
+        {
+            Trace.WriteLine("Setting results");
+            _Results.Clear();
+            if (results.Count == 0)
+            {
+                _Results.Add(new Result { ProductName = "No Results", Link = null });
+                return;
+            }
+            foreach (var result in results)
+            {
+                _Results.Add(new Result
+                {
+                    ProductName = result.Name,
+                    Link = result.Link
+                });
+
+                
+            }
+            OnPropertyChanged("Results");
+        }
+
         public void SetResults(List<SigmaAldrich.Result> results)
         {
             Trace.WriteLine("Setting results");
@@ -189,8 +211,8 @@ namespace COSHH_Generator
             currentQuery = query;
             searchTokenSource = new CancellationTokenSource();
 
-            searchTask = Task.Run(() => SigmaAldrich.SearchAsync(query, searchTokenSource.Token));
-            List<SigmaAldrich.Result> results = await searchTask;
+            searchTask = Task.Run(() => Fisher.SearchAsync(query, searchTokenSource.Token));
+            List<Fisher.Result> results = await searchTask;
             substanceEntry.SetResults(results);
             
             if (results.Any())
@@ -220,7 +242,7 @@ namespace COSHH_Generator
             substanceEntry.safetyData = null;
             extractionTokenSource = new CancellationTokenSource();
             bool success = true;
-            substanceEntry.ExtractionTask = Task.Run(() => SDSParser.Extract(substanceResult.Link!, extractionTokenSource.Token,
+            substanceEntry.ExtractionTask = Task.Run(() => Fisher.Extract(substanceResult.Link!, extractionTokenSource.Token,
                 () => {
                     success = false;
                 }));
@@ -228,7 +250,8 @@ namespace COSHH_Generator
             substanceEntry.safetyData = await substanceEntry.ExtractionTask;
             substanceEntry.ExtractionTask = null;
             extractionTokenSource!.Dispose();
-            
+            substanceEntry.DisplayName = substanceEntry.safetyData.SubstanceName;
+
             if (!success)
             {
                 MessageBox.Show($"Failed to extract \"{substanceResult.ProductName}\"", "Extraction Failure", MessageBoxButton.OK);
@@ -388,7 +411,7 @@ namespace COSHH_Generator
 
         string currentQuery = string.Empty;
         public SubstanceEntry substanceEntry = new SubstanceEntry();
-        private Task<List<SigmaAldrich.Result>>? searchTask;
+        private Task<List<Fisher.Result>>? searchTask;
 
         private CancellationTokenSource? extractionTokenSource = null;
         private CancellationTokenSource? searchTokenSource = null;

@@ -27,7 +27,9 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>-->
 		<PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.67" />
 		<PackageReference Include="iTextSharp" Version="5.5.13.3" />
+		<PackageReference Include="Selenium.WebDriver" Version="4.25.0" />
     </ItemGroup>
 
     <ItemGroup>

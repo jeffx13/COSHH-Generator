@@ -7,6 +7,7 @@ namespace COSHH_Generator.Core
     public class SafetyData
     {
         private Hazard hazards = Hazard.NONE;
+        public string SubstanceName = "";
         public string Odour = "N/A";
         public bool Eyes
         {

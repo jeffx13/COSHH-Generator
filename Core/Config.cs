@@ -99,7 +99,7 @@ namespace COSHH_Generator
                 if (_connectionTimeout != value)
                 {
                     _connectionTimeout = value;
-                    SDSParser.Client.Timeout = TimeSpan.FromMilliseconds(value);
+                    Fisher.Timeout = value;
                     OnPropertyChanged(nameof(ConnectionTimeout));
 
                 }
