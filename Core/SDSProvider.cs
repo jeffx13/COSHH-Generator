@@ -10,14 +10,11 @@ namespace COSHH_Generator.Core
 {
     public interface SDSProvider
     {
-        private readonly static HttpClient Client = new HttpClient(new HttpClientHandler
+        public int Timeout
         {
-            UseProxy = false,
-            AllowAutoRedirect = true,
-        })
-        {
-            Timeout = TimeSpan.FromSeconds(5)
-        };
+            get;
+            set;
+        }
         public string Name { get; }
         public Task<List<Result>> SearchAsync(string query, CancellationToken cancelToken = default);
         public Task<SafetyData> ExtractAsync(string url, CancellationToken cancelToken, Action<string> errorCallback);

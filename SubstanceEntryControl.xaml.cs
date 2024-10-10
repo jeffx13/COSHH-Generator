@@ -24,7 +24,7 @@ namespace COSHH_Generator
             OnPropertyChanged("DisplayName");
         }
         static ObservableCollection<SDSProvider> _SDSProviders = new ObservableCollection<SDSProvider> { new SigmaAldrich(), new Fisher() };
-        public ObservableCollection<SDSProvider> SDSProviders
+        public static ObservableCollection<SDSProvider> SDSProviders
         {
             get
             {

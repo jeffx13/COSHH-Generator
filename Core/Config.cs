@@ -90,7 +90,7 @@ namespace COSHH_Generator
                 }
             }
         }
-        private int _connectionTimeout = 10000;
+        private int _connectionTimeout = 5000;
         public int ConnectionTimeout
         {
             get { return _connectionTimeout; }
@@ -99,7 +99,10 @@ namespace COSHH_Generator
                 if (_connectionTimeout != value)
                 {
                     _connectionTimeout = value;
-                    Fisher.Timeout = value;
+                    foreach (var provider in SubstanceEntry.SDSProviders)
+                    {
+                        provider.Timeout = value;
+                    }
                     OnPropertyChanged(nameof(ConnectionTimeout));
 
                 }

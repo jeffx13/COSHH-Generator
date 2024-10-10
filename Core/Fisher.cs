@@ -22,14 +22,16 @@ namespace COSHH_Generator.Core
         public static Regex PrecautionaryStatementRegex = new Regex(@"P\d{3}(?:\s?\+\s?P\d{3}){0,2}", RegexOptions.Multiline);
         public static Regex EUHazardStatementRegex = new Regex(@"EUH\d{3}A?", RegexOptions.Multiline);
 
-        private readonly static HttpClient Client = new HttpClient(new HttpClientHandler
+        private readonly HttpClient Client = new HttpClient(new HttpClientHandler
         {
             UseProxy = false,
+            AllowAutoRedirect = true,
         })
         {
             Timeout = TimeSpan.FromSeconds(5)
         };
-        public static int Timeout {
+
+        public int Timeout {
             get { return (int)Client.Timeout.TotalMilliseconds; }
             set { Client.Timeout = TimeSpan.FromMilliseconds(value); }
         }
