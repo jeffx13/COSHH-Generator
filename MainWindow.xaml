@@ -105,8 +105,8 @@
             <Button Click="AddNewSubstance" Height="50"> Add New Substance</Button >
         </ListBox>
 
-        <Button Name="AddNewSubstanceButton" Grid.Row="3" Grid.Column="0" Click="AddNewSubstance" IsTabStop="False">Add substance</Button>
-        <Button Name="CLearButton" Grid.Row="3" Grid.Column="1" Click="Clear" IsTabStop="False">Clear</Button>
+        <Button Name="CLearButton" Grid.Row="3" Grid.Column="0" Click="Clear" IsTabStop="False">Clear</Button>
+        <Button Name="AddNewSubstanceButton" Grid.Row="3" Grid.Column="1" Click="AddNewSubstance" IsTabStop="False">Add substance</Button>
         <Button Name="generateButton" Grid.Row="3" Grid.Column="2" Click="Generate" IsTabStop="False">Generate</Button>
 
         <Grid Grid.Row="4" Grid.ColumnSpan="3">

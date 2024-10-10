@@ -5,10 +5,11 @@
              Width="1000" Height="Auto" >
     <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
+            <RowDefinition Height="27*" />
+            <RowDefinition Height="23*" />
+            <RowDefinition Height="11*" />
+            <RowDefinition Height="16*"/>
+            <RowDefinition Height="18*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.06*" />
@@ -37,7 +38,7 @@
             </RadioButton>
             <RadioButton x:Name="UsePoolRadioButton"
                          Grid.Row="0" Grid.Column="1" IsTabStop="False" Focusable="False">
-            <TextBlock Text="Use Pool" />
+                <TextBlock Text="Use Pool" />
             </RadioButton>
             <ComboBox x:Name="ChemicalPoolComboBox"
                       Grid.Row="0" Grid.Column="2"
@@ -55,28 +56,34 @@
         </Grid>
 
         <!-- Search Query Label and TextBox -->
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Query:" Focusable="False" />
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Query:" Focusable="False" Grid.ColumnSpan="2" Margin="0,0,431,11" Grid.RowSpan="2" />
         <TextBox x:Name="SearchQueryTextBox" Grid.Row="1" Grid.Column="1" Margin="0,0,10,5"  
                  MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox"/>
 
         <!-- Amount Label and TextBox -->
-        <TextBlock Grid.Row="1" Grid.Column="2" Text="Mass/Volume:" />
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="Mass/Volume:" Margin="0,0,0,11" Grid.RowSpan="2" />
         <TextBox x:Name="AmountTextBox" Grid.Row="1" Grid.Column="3" Margin="0,0,5,5" 
                  Text="{Binding Path=Amount}" 
                  MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" />
 
         <!-- Results Label and ComboBox -->
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Results:" />
-        
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Results:" Grid.ColumnSpan="2" Margin="0,0,431,18" Grid.RowSpan="3" />
         <ComboBox x:Name="ResultsComboBox"
-                  Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4"
-                  ItemsSource="{Binding Results}"
-                  DisplayMemberPath="ProductName"
-                  Margin="0,0,5,5" IsEnabled="False"
-                  />
+           Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+           ItemsSource="{Binding Results}"
+           DisplayMemberPath="ProductName"
+           Margin="0,0,5,5" IsEnabled="False" Grid.RowSpan="2"
+           />
         
+        <ComboBox x:Name="SDSProviderComboBox"
+                  Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="2"
+                  ItemsSource="{Binding SDSProviders}"
+                  DisplayMemberPath="Name"
+                  Margin="0,0,5,5" IsEnabled="True" Grid.RowSpan="2"
+                  />
+
         <!-- Display Name and Odour Grid -->
-        <Grid Grid.Row="3" Grid.ColumnSpan="5">
+        <Grid Grid.Row="4" Grid.ColumnSpan="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="0.10*" />
                 <ColumnDefinition Width="0.60*" />
@@ -96,7 +103,7 @@
 
         <!-- Delete Button -->
         <Button x:Name="DeleteSubstanceButton"
-                Grid.RowSpan="4" Grid.Column="6"
+                Grid.RowSpan="5" Grid.Column="5"
                 Content="Delete" IsTabStop="False" />
     </Grid>
 </UserControl>

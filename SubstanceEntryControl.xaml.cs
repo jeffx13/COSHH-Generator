@@ -23,6 +23,15 @@ namespace COSHH_Generator
         {
             OnPropertyChanged("DisplayName");
         }
+        static ObservableCollection<SDSProvider> _SDSProviders = new ObservableCollection<SDSProvider> { new SigmaAldrich(), new Fisher() };
+        public ObservableCollection<SDSProvider> SDSProviders
+        {
+            get
+            {
+                return _SDSProviders;
+            }
+        }
+        public SDSProvider Provider = _SDSProviders[0];
         public string _DisplayName = "";
         public string DisplayName
         {
@@ -79,8 +88,8 @@ namespace COSHH_Generator
             {
                 return _Results;
             }
-
         }
+
 
         public void invalidateResult(string link)
         {
@@ -90,57 +99,13 @@ namespace COSHH_Generator
             OnPropertyChanged("Results");
         }
 
-        public void SetResults(List<Fisher.Result> results)
+        
+
+        public void SetResults(List<Result> results)
         {
             Trace.WriteLine("Setting results");
             _Results.Clear();
-            if (results.Count == 0)
-            {
-                _Results.Add(new Result { ProductName = "No Results", Link = null });
-                return;
-            }
-            foreach (var result in results)
-            {
-                _Results.Add(new Result
-                {
-                    ProductName = result.Name,
-                    Link = result.Link
-                });
-
-                
-            }
-            OnPropertyChanged("Results");
-        }
-
-        public void SetResults(List<SigmaAldrich.Result> results)
-        {
-            Trace.WriteLine("Setting results");
-            _Results.Clear();
-            if (results.Count == 0)
-            {
-                _Results.Add(new Result { ProductName = "No Results", Link = null});
-                return;
-            }
-
-            foreach (var result in results)
-            {
-                _Results.Add(new Result
-                {
-                    ProductName = result.Name,
-                    Link = null
-                });
-
-                for (int j = 0; j < result.Products.Count; j++)
-                {
-                    SigmaAldrich.Result.Product product = result.Products[j];
-                    _Results.Add(new Result
-                    {
-                        ProductName = $"{j + 1}. {product.Description}",
-                        SubstanceName = result.Name,
-                        Link = product.Link,
-                    });
-                }
-            }
+            _Results = new ObservableCollection<Result>(results);
             OnPropertyChanged("Results");
         }
 
@@ -158,6 +123,7 @@ namespace COSHH_Generator
         public event PropertyChangedEventHandler? PropertyChanged;
         internal void OnPropertyChanged([CallerMemberName] string propName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
     }
+    
     public class Result: INotifyPropertyChanged
     {
         public string SubstanceName { get; set; }
@@ -179,7 +145,7 @@ namespace COSHH_Generator
                 return Link != null;
             }
         }
-
+        
         public event PropertyChangedEventHandler? PropertyChanged;
         internal void OnPropertyChanged([CallerMemberName] string propName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
 
@@ -195,10 +161,13 @@ namespace COSHH_Generator
             Bind();
         }
 
-        private async void Search(string query)
+        
+
+
+        private async void Search(string query, bool force = false)
         {
             query = query.Trim();
-            if (currentQuery == query || string.IsNullOrEmpty(query)) return;
+            if (string.IsNullOrEmpty(query) || (!force && currentQuery == query) ) return;
             
             // Cancel the current search task
             if (searchTask is not null)
@@ -211,8 +180,8 @@ namespace COSHH_Generator
             currentQuery = query;
             searchTokenSource = new CancellationTokenSource();
 
-            searchTask = Task.Run(() => Fisher.SearchAsync(query, searchTokenSource.Token));
-            List<Fisher.Result> results = await searchTask;
+            searchTask = Task.Run(() => substanceEntry.Provider.SearchAsync(query, searchTokenSource.Token));
+            List<Result> results = await searchTask;
             substanceEntry.SetResults(results);
             
             if (results.Any())
@@ -242,25 +211,28 @@ namespace COSHH_Generator
             substanceEntry.safetyData = null;
             extractionTokenSource = new CancellationTokenSource();
             bool success = true;
-            substanceEntry.ExtractionTask = Task.Run(() => Fisher.Extract(substanceResult.Link!, extractionTokenSource.Token,
-                () => {
+            substanceEntry.ExtractionTask = Task.Run(() => substanceEntry.Provider.ExtractAsync(substanceResult.Link!, extractionTokenSource.Token,
+                (string errorMessage) => {
+                    MessageBox.Show(errorMessage, $"Extraction failed: \"{substanceResult.ProductName}\"", MessageBoxButton.OK);
                     success = false;
                 }));
 
             substanceEntry.safetyData = await substanceEntry.ExtractionTask;
             substanceEntry.ExtractionTask = null;
             extractionTokenSource!.Dispose();
-            substanceEntry.DisplayName = substanceEntry.safetyData.SubstanceName;
+            if (substanceEntry.safetyData.SubstanceName.Any())
+            {
+                substanceEntry.DisplayName = substanceEntry.safetyData.SubstanceName;
+            }
+            
 
             if (!success)
             {
-                MessageBox.Show($"Failed to extract \"{substanceResult.ProductName}\"", "Extraction Failure", MessageBoxButton.OK);
                 if (_SelectedResult != null)
                 {
                     substanceEntry.invalidateResult(_SelectedResult.Link!);
                 }
                 _SelectedResult = null;
-
                 substanceEntry.DisplayName = "";
                 ResultsComboBox.SelectedIndex = -1;
             } 
@@ -268,6 +240,7 @@ namespace COSHH_Generator
 
         private void Bind()
         {
+            SDSProviderComboBox.SelectedIndex = 0;
             ResultsComboBox.KeyDown += (sender, e) =>
             {
                 if ((e.Key == Key.Enter || e.Key == Key.Space) && substanceEntry.Results.Count > 0)
@@ -290,6 +263,26 @@ namespace COSHH_Generator
                 if (addedItems.Count > 0)
                 {
                     SelectedResult = (Result)args.AddedItems[0]!;
+                }
+            };
+
+            SDSProviderComboBox.SelectionChanged += (sender, args) =>
+            {
+                var addedItems = args.AddedItems;
+                if (addedItems.Count > 0)
+                {
+                    substanceEntry.Provider = (SDSProvider)args.AddedItems[0]!;
+                    if (SearchQueryTextBox.Text.Length > 0)
+                    {
+                        if (substanceEntry.ExtractionTask is not null)
+                        {
+                            extractionTokenSource!.Cancel();
+
+                            substanceEntry.ExtractionTask.Wait();
+                            extractionTokenSource!.Dispose();
+                        }
+                        Search(SearchQueryTextBox.Text, true);
+                    }
                 }
             };
 
@@ -350,6 +343,7 @@ namespace COSHH_Generator
             ChemicalPoolComboBox.IsEnabled = false;
             SearchQueryTextBox.IsEnabled = true;
             ResultsComboBox.IsEnabled = true;
+            SDSProviderComboBox.IsEnabled = true;
 
             substanceEntry.safetyData = null;
             substanceEntry.Amount = "";
@@ -366,6 +360,7 @@ namespace COSHH_Generator
         {
             ChemicalPoolComboBox.IsEnabled = true;
             SearchQueryTextBox.IsEnabled = false;
+            SDSProviderComboBox.IsEnabled = false;
             ResultsComboBox.IsEnabled = false;
             
             if (_SelectedResult != null)
@@ -411,7 +406,7 @@ namespace COSHH_Generator
 
         string currentQuery = string.Empty;
         public SubstanceEntry substanceEntry = new SubstanceEntry();
-        private Task<List<Fisher.Result>>? searchTask;
+        private Task<List<Result>>? searchTask;
 
         private CancellationTokenSource? extractionTokenSource = null;
         private CancellationTokenSource? searchTokenSource = null;

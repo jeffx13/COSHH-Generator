@@ -109,6 +109,7 @@ namespace COSHH_Generator
                 } else if (string.IsNullOrEmpty(substanceEntries[i].DisplayName))
                 {
                     MessageBox.Show($"Display Name is not set at index {i}", "Generation Error", MessageBoxButton.OK);
+                    generateButton.IsEnabled = true;
                     return;
                 }
             }
