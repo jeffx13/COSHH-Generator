@@ -147,7 +147,7 @@ namespace COSHH_Generator.Core
             SafetyData safetyData = new SafetyData();
             if (cancelToken.IsCancellationRequested) { return safetyData; }
 
-            var challengeRequest = new HttpRequestMessage(HttpMethod.Get, "https://www.sigmaaldrich.com/GB/en/sds/supelco/48622?userType=anonymous");
+            var challengeRequest = new HttpRequestMessage(HttpMethod.Get, $"{url}?userType=anonymous");
             var challengeResponse = await ClientWithDecompression.SendAsync(challengeRequest, cancelToken);
             if (!challengeResponse.IsSuccessStatusCode)
             {
