@@ -27,7 +27,7 @@ namespace COSHH_Generator.Core
             
             Run run = new Run();
             RunProperties runProperties = new RunProperties();
-            runProperties.FontSize = new FontSize() { Val = "20" };
+            runProperties.FontSize = new FontSize() { Val = "20" }; // 10 pt font size
             run.AppendChild(runProperties);
             foreach (string hazardStatement in safetyData.HazardStatements)
             {
@@ -35,8 +35,6 @@ namespace COSHH_Generator.Core
                 run.AppendChild(new Break());
             }
             Run hazardsCell = row.Elements<TableCell>().ElementAt(2).Elements<Paragraph>().First().AppendChild(run);
-
-
             IEnumerable<Run> exposureRouteCell = row.Elements<TableCell>().ElementAt(3).Descendants<Run>();
 
             var eyeCheckBox = exposureRouteCell.ElementAt(2).GetFirstChild<Text>()!;
@@ -49,24 +47,19 @@ namespace COSHH_Generator.Core
             inhalationCheckBox.Text = safetyData.Inhalation ? "☒" : "☐";
             ingestionCheckBox.Text = safetyData.Ingestion ? "☒" : "☐";
 
-            //eyeCheckBox.Text = "☒a";
-            //skinCheckBox.Text = "☒b";
-            //inhalationCheckBox.Text = "☒c";
-            //ingestionCheckBox.Text = "☒d";
-
             IEnumerable<Run> controlMeasuresCell = row.Elements<TableCell>().ElementAt(4).Descendants<Run>();
 
             var consultSpillageCheckBox = controlMeasuresCell.ElementAt(0).GetFirstChild<Text>()!;
             var safetySpecCheckBox = controlMeasuresCell.ElementAt(2).GetFirstChild<Text>()!;
             var labCoatCheckBox = controlMeasuresCell.ElementAt(4).GetFirstChild<Text>()!;
             var glovesCheckBox = controlMeasuresCell.ElementAt(6).GetFirstChild<Text>()!;
-            var fumehoodCheckBox = controlMeasuresCell.ElementAt(9s).GetFirstChild<Text>()!;
-            var noNakedFlamesCheckBox = controlMeasuresCell.ElementAt(11).GetFirstChild<Text>()!;
-            var useWaterBathCheckBox = controlMeasuresCell.ElementAt(13).GetFirstChild<Text>()!;
-            var pregnantCheckBox = controlMeasuresCell.ElementAt(15).GetFirstChild<Text>()!;
-            var notNearWaterCheckBox = controlMeasuresCell.ElementAt(17).GetFirstChild<Text>()!;
-            var dropwiseCheckBox = controlMeasuresCell.ElementAt(19).GetFirstChild<Text>()!;
-            var notExposeToAirCheckBox = controlMeasuresCell.ElementAt(21).GetFirstChild<Text>()!;
+            var fumehoodCheckBox = controlMeasuresCell.ElementAt(9).GetFirstChild<Text>()!;
+            var noNakedFlamesCheckBox = controlMeasuresCell.ElementAt(12).GetFirstChild<Text>()!;
+            var useWaterBathCheckBox = controlMeasuresCell.ElementAt(14).GetFirstChild<Text>()!;
+            var pregnantCheckBox = controlMeasuresCell.ElementAt(16).GetFirstChild<Text>()!;
+            var notNearWaterCheckBox = controlMeasuresCell.ElementAt(18).GetFirstChild<Text>()!;
+            var dropwiseCheckBox = controlMeasuresCell.ElementAt(20).GetFirstChild<Text>()!;
+            var notExposeToAirCheckBox = controlMeasuresCell.ElementAt(22).GetFirstChild<Text>()!;
 
             consultSpillageCheckBox.Text = safetyData.ConsultSpill ? "☒" : "☐";
             safetySpecCheckBox.Text = safetyData.Goggles ? "☒" : "☐";
@@ -80,6 +73,10 @@ namespace COSHH_Generator.Core
             dropwiseCheckBox.Text = safetyData.Dropwise ? "☒" : "☐";
             notExposeToAirCheckBox.Text = safetyData.NotExposeToAir ? "☒" : "☐";
 
+            //eyeCheckBox.Text = "☒a";
+            //skinCheckBox.Text = "☒b";
+            //inhalationCheckBox.Text = "☒c";
+            //ingestionCheckBox.Text = "☒d";
             //consultSpillageCheckBox.Text = "☒a";
             //safetySpecCheckBox.Text = "☒b";
             //labCoatCheckBox.Text = "☒c";
@@ -91,8 +88,6 @@ namespace COSHH_Generator.Core
             //notNearWaterCheckBox.Text = "☒i";
             //dropwiseCheckBox.Text = "☒j";
             //notExposeToAirCheckBox.Text = "☒k";
-
-
 
             //if (safetyData.Flammable | safetyData.Explosive)
             //{
