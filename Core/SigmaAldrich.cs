@@ -74,11 +74,8 @@ namespace COSHH_Generator.Core
 
         public async Task<List<Result>> SearchAsync(string query, CancellationToken cancelToken = default)
         {
-            Trace.WriteLine("Searching " + query);
             string encodedQuery = WebUtility.UrlEncode(query.Trim().ToLower().Replace(" ", "-"));
-
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://www.sigmaaldrich.com/api?operation=ProductSearch");
-
             request.Headers.Add("accept", "*/*");
             request.Headers.Add("accept-language", "en-GB,en;q=0.9,zh-CN;q=0.8,zh;q=0.7");
             request.Headers.Add("origin", "https://www.sigmaaldrich.com");
@@ -199,7 +196,6 @@ namespace COSHH_Generator.Core
 
             var pdfResponse = await ClientWithDecompression.SendAsync(pdfRequest, cancelToken);
             PdfReader reader = new PdfReader(await pdfResponse.Content.ReadAsStreamAsync());
-            Trace.WriteLine("Extracting");
 
             for (int page = 1; page <= reader.NumberOfPages; page++)
             {

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.EMMA;
 
 namespace COSHH_Generator.Core
 {
@@ -43,19 +44,25 @@ namespace COSHH_Generator.Core
             inhalationCheckBox.Text = safetyData.Inhalation ? "☒" : "☐";
             ingestionCheckBox.Text = safetyData.Ingestion ? "☒" : "☐";
 
+            eyeCheckBox.Text = "☒a";
+            skinCheckBox.Text = "☒b";
+            inhalationCheckBox.Text = "☒c";
+            ingestionCheckBox.Text = "☒d";
+
+
             IEnumerable<Run> controlMeasuresCell = row.Elements<TableCell>().ElementAt(4).Descendants<Run>();
 
             var consultSpillageCheckBox = controlMeasuresCell.ElementAt(0).GetFirstChild<Text>()!;
-            var safetySpecCheckBox = controlMeasuresCell.ElementAt(3).GetFirstChild<Text>()!;
-            var labCoatCheckBox = controlMeasuresCell.ElementAt(5).GetFirstChild<Text>()!;
-            var glovesCheckBox = controlMeasuresCell.ElementAt(7).GetFirstChild<Text>()!;
-            var fumehoodCheckBox = controlMeasuresCell.ElementAt(10).GetFirstChild<Text>()!;
-            var noNakedFlamesCheckBox = controlMeasuresCell.ElementAt(13).GetFirstChild<Text>()!;
-            var useWaterBathCheckBox = controlMeasuresCell.ElementAt(17).GetFirstChild<Text>()!;
-            var pregnantCheckBox = controlMeasuresCell.ElementAt(20).GetFirstChild<Text>()!;
-            var notNearWaterCheckBox = controlMeasuresCell.ElementAt(22).GetFirstChild<Text>()!;
-            var dropwiseCheckBox = controlMeasuresCell.ElementAt(24).GetFirstChild<Text>()!;
-            var notExposeToAirCheckBox = controlMeasuresCell.ElementAt(27).GetFirstChild<Text>()!;
+            var safetySpecCheckBox = controlMeasuresCell.ElementAt(2).GetFirstChild<Text>()!;
+            var labCoatCheckBox = controlMeasuresCell.ElementAt(4).GetFirstChild<Text>()!;
+            var glovesCheckBox = controlMeasuresCell.ElementAt(6).GetFirstChild<Text>()!;
+            var fumehoodCheckBox = controlMeasuresCell.ElementAt(9).GetFirstChild<Text>()!;
+            var noNakedFlamesCheckBox = controlMeasuresCell.ElementAt(12).GetFirstChild<Text>()!;
+            var useWaterBathCheckBox = controlMeasuresCell.ElementAt(14).GetFirstChild<Text>()!;
+            var pregnantCheckBox = controlMeasuresCell.ElementAt(16).GetFirstChild<Text>()!;
+            var notNearWaterCheckBox = controlMeasuresCell.ElementAt(18).GetFirstChild<Text>()!;
+            var dropwiseCheckBox = controlMeasuresCell.ElementAt(20).GetFirstChild<Text>()!;
+            var notExposeToAirCheckBox = controlMeasuresCell.ElementAt(22).GetFirstChild<Text>()!;
 
             consultSpillageCheckBox.Text = safetyData.ConsultSpill ? "☒" : "☐";
             safetySpecCheckBox.Text = safetyData.Goggles ? "☒" : "☐";
@@ -68,6 +75,20 @@ namespace COSHH_Generator.Core
             notNearWaterCheckBox.Text = safetyData.NotNearWater ? "☒" : "☐";
             dropwiseCheckBox.Text = safetyData.Dropwise ? "☒" : "☐";
             notExposeToAirCheckBox.Text = safetyData.NotExposeToAir ? "☒" : "☐";
+
+            //consultSpillageCheckBox.Text = "☒a";
+            //safetySpecCheckBox.Text      = "☒b";
+            //labCoatCheckBox.Text         = "☒c";
+            //glovesCheckBox.Text          = "☒d";
+            //fumehoodCheckBox.Text        = "☒e";
+            //noNakedFlamesCheckBox.Text = "☒f";
+            //useWaterBathCheckBox.Text = "☒g";
+            //pregnantCheckBox.Text = "☒h";
+            //notNearWaterCheckBox.Text = "☒i";
+            //dropwiseCheckBox.Text        = "☒j";
+            //notExposeToAirCheckBox.Text  = "☒k";
+
+
 
             //if (safetyData.Flammable | safetyData.Explosive)
             //{
@@ -113,60 +134,74 @@ namespace COSHH_Generator.Core
             //// "Ensure all reactions are performed on a small (test tube) scale. Assume unknown samples to analyse are highly toxic and hazardous."
         }
 
+        private static async Task<string> TryGenerate(Config info, List<SubstanceEntry> substanceEntries, string outputPath)
+        {
+            const int bufferSize = 81920;
+            using (FileStream sourceStream = new FileStream(templatePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true))
+            using (FileStream destinationStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, true))
+            {
+                await sourceStream.CopyToAsync(destinationStream);
+            }
+
+
+            using (WordprocessingDocument doc = WordprocessingDocument.Open(outputPath, true))
+            {
+                FillForm(doc, info);
+                List<SubstanceEntry> substances;
+                if (info.Shuffle)
+                {
+                    do
+                    {
+                        substances = ShuffleListInSections(substanceEntries, 3);
+                    }
+                    while (substances.SequenceEqual(substanceEntries));
+                }
+                else
+                {
+                    substances = substanceEntries;
+                }
+                foreach (var substanceEntry in substances)
+                {
+                    if (substanceEntry.safetyData == null)
+                    {
+                        await substanceEntry.ExtractionTask!;
+                        await Task.Delay(100);
+                    }
+                    if (substanceEntry.safetyData == null)
+                    {
+                        return $"Generation failed: Failed to extract \"{substanceEntry.DisplayName}\"";
+                    }
+                    substanceEntry.Amount = string.IsNullOrEmpty(substanceEntry.Amount.Trim()) ? "N/A" : substanceEntry.Amount;
+                    AddSubstance(doc, substanceEntry.DisplayName, substanceEntry.Amount, substanceEntry.safetyData);
+
+                }
+                var substanceRows = doc.MainDocumentPart!.Document.Body!.Elements<Table>().ElementAt(2).Descendants<TableRow>();
+                if (substanceRows.Count() > 2)
+                {
+                    substanceRows.Last().Remove();
+                }
+            }
+
+            FileAttributes attributes = File.GetAttributes(outputPath);
+            attributes &= ~(FileAttributes.Hidden | FileAttributes.ReadOnly);
+            File.SetAttributes(outputPath, attributes);
+            return "";
+        }
+
         public static async Task<string> Generate(Config info, List<SubstanceEntry> substanceEntries, string outputPath)
         {
-
             try
             {
-                const int bufferSize = 81920; // 80KB buffer size
-                using (FileStream sourceStream = new FileStream(templatePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true))
-                using (FileStream destinationStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, true))
-                {
-                    await sourceStream.CopyToAsync(destinationStream);
-                }
-
-
-                using (WordprocessingDocument doc = WordprocessingDocument.Open(outputPath, true))
-                {
-
-                    FillForm(doc, info);
-
-                    foreach (var substanceEntry in substanceEntries)
-                    {
-                        if (substanceEntry.safetyData == null)
-                        {
-                            await substanceEntry.ExtractionTask!;
-                            await Task.Delay(100);
-                        }
-                        if (substanceEntry.safetyData == null)
-                        {
-                            return $"Generation failed: Failed to extract \"{substanceEntry.DisplayName}\"";
-                        }
-                        substanceEntry.Amount = string.IsNullOrEmpty(substanceEntry.Amount.Trim()) ? "N/A" : substanceEntry.Amount;
-
-                        AddSubstance(doc, substanceEntry.DisplayName, substanceEntry.Amount, substanceEntry.safetyData);
-                    }
-                    var substanceRows = doc.MainDocumentPart!.Document.Body!.Elements<Table>().ElementAt(2).Descendants<TableRow>();
-                    if (substanceRows.Count() > 2)
-                    {
-                        substanceRows.Last().Remove();
-                    }
-                }
-
-                FileAttributes attributes = File.GetAttributes(outputPath);
-                attributes &= ~(FileAttributes.Hidden | FileAttributes.ReadOnly);
-                File.SetAttributes(outputPath, attributes);
-            } catch (Exception e)
-            {
+                return await TryGenerate(info, substanceEntries, outputPath); }
+            catch (Exception e) {
                 return e.Message;
-            }
-            return "";
+            };
 
-        }
+            }
 
         private static void FillForm(in WordprocessingDocument doc, in Config info)
         {
-            
+
             // Filling the student info
             IEnumerable<TableRow> rows = doc.MainDocumentPart!.Document.Body!.Elements<Table>().First().Elements<TableRow>();
             var titleCell = rows.ElementAt(0).Elements<TableCell>().ElementAt(1).Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>().First();
@@ -181,7 +216,7 @@ namespace COSHH_Generator.Core
             yearCell.Text = info.Year;
             dateCell.Text = info.Date;
 
-            
+
             // Fill the specific safeties
             Table specificSafetyTable = doc.MainDocumentPart!.Document.Body!.Elements<Table>().ElementAt(3);
             var fireExplosionRow = specificSafetyTable.Elements<TableRow>().ElementAt(1);
@@ -263,11 +298,32 @@ namespace COSHH_Generator.Core
             aqueousCheckBox.Text = info.Aqueous ? "☒" : "☐";
             namedCheckBox.Text = info.Named ? "☒" : "☐";
             silicaCheckBox.Text = info.SilicaTLC ? "☒" : "☐";
-            
+
 
         }
 
+        public static List<T> ShuffleListInSections<T>(List<T> list, int sectionSize)
+        {
+            List<T> newList = new List<T>(list);
+            int timeMsSinceMidnight = (int)DateTime.Now.TimeOfDay.TotalMilliseconds;
+            Random rng = new Random(timeMsSinceMidnight);
+            int totalSections = (int)Math.Ceiling(list.Count / (double)sectionSize);
+            for (int section = 0; section < totalSections; section++)
+            {
+                int start = section * sectionSize;
+                int end = Math.Min(start + sectionSize, newList.Count);
+                for (int i = start; i < end - 1; i++)
+                {
+                    int j = rng.Next(i, end);
+                    T temp = newList[i];
+                    newList[i] = newList[j];
+                    newList[j] = temp;
+                }
+            }
 
+
+            return newList;
+        }
     }
 
 }

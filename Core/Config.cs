@@ -7,7 +7,7 @@ namespace COSHH_Generator
 {
     public class Config : INotifyPropertyChanged
     {
-        private string _title;
+        private string _title = string.Empty;
         public string Title
         {
             get { return _title; }
@@ -21,7 +21,7 @@ namespace COSHH_Generator
             }
         }
 
-        private string _name;
+        private string _name = string.Empty;
         public string Name
         {
             get { return _name; }
@@ -35,7 +35,7 @@ namespace COSHH_Generator
             }
         }
 
-        private string _college;
+        private string _college = string.Empty;
         public string College
         {
             get { return _college; }
@@ -49,7 +49,7 @@ namespace COSHH_Generator
             }
         }
 
-        private string _year;
+        private string _year = string.Empty;
         public string Year
         {
             get { return _year; }
@@ -63,7 +63,7 @@ namespace COSHH_Generator
             }
         }
 
-        private string _date;
+        private string _date = string.Empty;
         public string Date
         {
             get { return _date; }
@@ -73,6 +73,20 @@ namespace COSHH_Generator
                 {
                     _date = value;
                     OnPropertyChanged(nameof(Date));
+                }
+            }
+        }
+
+        private bool _shuffle = false;
+        public bool Shuffle
+        {
+            get { return _shuffle; }
+            set
+            {
+                if (_shuffle != value)
+                {
+                    _shuffle = value;
+                    OnPropertyChanged(nameof(Shuffle));
                 }
             }
         }
@@ -235,7 +249,7 @@ namespace COSHH_Generator
             }
         }
 
-        private string _specialMeasuresText;
+        private string _specialMeasuresText = string.Empty;
         public string SpecialMeasuresText
         {
             get { return _specialMeasuresText; }

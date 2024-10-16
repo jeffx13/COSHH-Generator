@@ -24,6 +24,8 @@ namespace COSHH_Generator
             OnPropertyChanged("DisplayName");
         }
         static ObservableCollection<SDSProvider> _SDSProviders = new ObservableCollection<SDSProvider> { new SigmaAldrich(), new Fisher() };
+        string currentQuery = string.Empty;
+        public string CurrentQuery { get => currentQuery; set => currentQuery = value; }
         public static ObservableCollection<SDSProvider> SDSProviders
         {
             get
@@ -103,7 +105,6 @@ namespace COSHH_Generator
 
         public void SetResults(List<Result> results)
         {
-            Trace.WriteLine("Setting results");
             _Results.Clear();
             _Results = new ObservableCollection<Result>(results);
             OnPropertyChanged("Results");
@@ -164,10 +165,10 @@ namespace COSHH_Generator
         
 
 
-        private async void Search(string query, bool force = false)
+        public async void Search(string query, bool force = false, bool openComboBox=true)
         {
             query = query.Trim();
-            if (string.IsNullOrEmpty(query) || (!force && currentQuery == query) ) return;
+            if (string.IsNullOrEmpty(query) || (!force && substanceEntry.CurrentQuery == query) ) return;
             
             // Cancel the current search task
             if (searchTask is not null)
@@ -177,18 +178,29 @@ namespace COSHH_Generator
                 searchTokenSource!.Dispose();
             }
             // Initiate new search task
-            currentQuery = query;
+            substanceEntry.CurrentQuery = query;
             searchTokenSource = new CancellationTokenSource();
 
             searchTask = Task.Run(() => substanceEntry.Provider.SearchAsync(query, searchTokenSource.Token));
             List<Result> results = await searchTask;
-            substanceEntry.SetResults(results);
             
+            substanceEntry.SetResults(results);
+
             if (results.Any())
             {
-                ResultsComboBox.IsEnabled = true;
-                ResultsComboBox.IsDropDownOpen = true;
-                ResultsComboBox.Focus();
+                if (UsePoolRadioButton.IsChecked == false)
+                {
+                    ResultsComboBox.IsEnabled = true;
+                    if (openComboBox)
+                    {
+                        ResultsComboBox.IsDropDownOpen = true;
+                        ResultsComboBox.Focus();
+                    }
+                } else
+                {
+                    ResultsComboBox.IsEnabled = false;
+                }
+               
             } else
             {
                 ResultsComboBox.SelectedIndex = 0;
@@ -285,7 +297,7 @@ namespace COSHH_Generator
                     }
                 }
             };
-
+            
             SearchQueryTextBox.KeyDown += new KeyEventHandler((object sender, KeyEventArgs e) => {
                 if (e.Key == Key.Enter)
                 {
@@ -363,6 +375,7 @@ namespace COSHH_Generator
             SDSProviderComboBox.IsEnabled = false;
             ResultsComboBox.IsEnabled = false;
             
+            
             if (_SelectedResult != null)
             {
                 cachedSafetyData = substanceEntry.safetyData;
@@ -398,13 +411,12 @@ namespace COSHH_Generator
 
         public void Dispose()
         {
-            Trace.WriteLine("disposed");
         }
 
         static Lazy<ChemicalPool> chemicalPool = new Lazy<ChemicalPool>();
         public static int SearchOrPoolGroupIndex = 0;
 
-        string currentQuery = string.Empty;
+        
         public SubstanceEntry substanceEntry = new SubstanceEntry();
         private Task<List<Result>>? searchTask;
 

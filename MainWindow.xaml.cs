@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Interop;
 using COSHH_Generator.Core;
 
 
@@ -42,7 +45,41 @@ namespace COSHH_Generator
                 }
                 catch { }
             }
+            Deactivated += (sender, e) =>
+            {
+                popupWasOpen = editPopup.IsOpen;
+                editPopup.IsOpen = false;
+                deactivated = true;
+            };
+
+            Activated += (sender, e) =>
+            {
+                deactivated = false;
+                if (popupWasOpen)
+                {
+                    if (reopenEditPopupTask != null)
+                    {
+                        reopenEditPopupTask.Wait();
+                    }
+                    else
+                    {
+                        reopenEditPopupTask = Task.Run(() => {
+                            Task.Delay(300).Wait();
+                            Dispatcher.Invoke(() => {
+                                if (!deactivated)
+                                { editPopup.IsOpen = true; editTextBox.Focus(); }
+                            });
+                            reopenEditPopupTask = null;
+                        });
+                    }
+                }
+            };
         }
+        bool deactivated = false;
+        Task? reopenEditPopupTask = null;
+        bool popupWasOpen = false;
+        
+        
 
         private void onLoaded(object sender, RoutedEventArgs e)
         {
@@ -79,8 +116,61 @@ namespace COSHH_Generator
             };
             substanceListBox.Items.Insert(substanceListBox.Items.Count - 1, substanceEntryControl);
         }
+        
+        private void openEditPopup(object? sender, RoutedEventArgs e)
+        {
+            if (editPopup.IsOpen)
+            {
+                editPopup.IsOpen = false;
+            } else
+            {
+
+                editPopup.IsOpen = true;
+                editTextBox.Focusable = true;
+                editTextBox.Focus();
+                editTextBox.Text = string.Join("\n", substanceEntries.Where(substanceEntry => !string.IsNullOrWhiteSpace(substanceEntry.CurrentQuery))
+                    .Select(substanceEntry => $"{substanceEntry.CurrentQuery};{substanceEntry.Amount}"));
+                editTextBox.Select(editTextBox.Text.Length, 0);
+            }
+        }
+        private void onEditSaveButtonPressed(object? sender, RoutedEventArgs e)
+        {
+         
+            var lines = editTextBox.Text.Split('\n')
+                .Select(line => line.Trim())
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .Select(line => line.Split(';'))
+                .ToArray();
             
-        private void Clear(object? sender, RoutedEventArgs? e)
+            for (int i = 0; i < lines.Length; i++)
+            {
+                var line = lines[i];
+                var query = line[0].Trim();
+                Trace.WriteLine(substanceEntries.Count);
+                if (i >= substanceEntries.Count)
+                {
+                    AddNewSubstance(); 
+                }
+                SubstanceEntryControl substanceEntryControl = (SubstanceEntryControl) substanceListBox.Items[i];
+                if (String.Compare(substanceEntryControl.SearchQueryTextBox.Text.Trim(), query, comparisonType: StringComparison.OrdinalIgnoreCase) == 0) continue;
+                substanceEntryControl.SearchQueryTextBox.Text = query;
+                substanceEntryControl.Search(query, false, false);
+                if (line.Length == 2)
+                {
+                    substanceEntryControl.substanceEntry.Amount = line[1].Trim();
+                }
+                
+            }
+            editPopup.IsOpen = false;
+
+            
+        }
+
+        private void closeEditPopup(object? sender, RoutedEventArgs? e)
+        {
+            editPopup.IsOpen = false;
+        }
+        private void Clear(object? sender = null, RoutedEventArgs? e = null)
         {
             substanceEntries.Clear();
             var delete = substanceListBox.Items[substanceListBox.Items.Count-1];
@@ -125,9 +215,19 @@ namespace COSHH_Generator
             string outputPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, config.OutputName + ".docx");
 
             List<SubstanceEntry> substances = new List<SubstanceEntry>(substanceEntries);
-            Task<string>  generateTasks = Task.Run(() =>
-                COSHHForm.Generate(config, substances, outputPath)
-            );
+
+            
+            Task<string> generateTasks = Task.Run(() => {
+                try
+                {
+                    return COSHHForm.Generate(config, substances, outputPath);
+                }
+                catch (Exception e)
+                {
+                    return Task.FromResult(e.Message);
+                }
+            });
+
 
             if (substanceEntries.Count == 0)
             {

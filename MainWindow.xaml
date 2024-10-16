@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:COSHH_Generator"
         mc:Ignorable="d" Loaded="onLoaded" ResizeMode="CanMinimize"
-        Title="COSHH Generator" Height="720" Width="1080">
-
+        Title="COSHH Generator" Height="720" Width="1080" x:Name="mainWindow" >
+   
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
@@ -57,14 +57,17 @@
         </Grid>
         <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0.04*"></ColumnDefinition> 
-                <ColumnDefinition Width="0.20*"></ColumnDefinition>
-                <ColumnDefinition Width="0.08*"></ColumnDefinition>
+                <ColumnDefinition Width="0.10*"></ColumnDefinition> 
+                <ColumnDefinition Width="0.15*"></ColumnDefinition>
+                <ColumnDefinition Width="0.04*"></ColumnDefinition>
+                <ColumnDefinition Width="0.02*"></ColumnDefinition>
                 <ColumnDefinition Width="0.03*"></ColumnDefinition>
                 <ColumnDefinition Width="0.02*"></ColumnDefinition>
-                <ColumnDefinition Width="0.01*"></ColumnDefinition>
-                <ColumnDefinition Width="0.02*"></ColumnDefinition>
-                <ColumnDefinition Width="0.05*"></ColumnDefinition>
+                <ColumnDefinition Width="0.04*"></ColumnDefinition>
+                <ColumnDefinition Width="0.09*"></ColumnDefinition>
+                <ColumnDefinition Width="0.12*"></ColumnDefinition>
+                <ColumnDefinition Width="0.06*"></ColumnDefinition>
+                <ColumnDefinition Width="0.09*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             
             <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14">
@@ -74,15 +77,15 @@
              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"  
              MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=OutputName}" FontSize="14">
             </TextBox>
-            
-            <TextBlock Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="14">
-            Connection Timeout (in ms):
+
+            <TextBlock Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14">
+            Shuffle:
             </TextBlock>
-            <TextBox Margin="0,5,15,5"  Name="ConnectionTimeoutTextBox" Grid.Row="0" Grid.Column="3" 
-             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"  
-             MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=ConnectionTimeout}" FontSize="14">  
-            </TextBox>
-            
+
+            <CheckBox Name="ShuffleCheckBox" VerticalAlignment="Center" Grid.Row="0" Grid.Column="3"
+                          Checked="onCheckedChanged" Unchecked="onCheckedChanged" IsChecked="{Binding Path=Shuffle}"
+                          Focusable="False" IsTabStop="False"></CheckBox>
+
             <TextBlock Grid.Row="0" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14">
                 Year:
             </TextBlock>
@@ -98,7 +101,38 @@
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"  
                      MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=Date}" FontSize="14">
             </TextBox>
+            <TextBlock Grid.Row="0" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="14">
+            Connection Timeout (ms):
+            </TextBlock>
+            <TextBox Margin="0,5,15,5"  Name="ConnectionTimeoutTextBox" Grid.Row="0" Grid.Column="9" 
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"  
+            MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" Text="{Binding Path=ConnectionTimeout}" FontSize="14">
+            </TextBox>
+            <Button Name="openEditPopupButton" Grid.Row="0" Grid.Column="10" HorizontalAlignment="Stretch" 
+                    Click="openEditPopup" FontSize="14" Margin="0,0,5,5">Edit</Button>
 
+            <Popup IsOpen="False" x:Name="editPopup" StaysOpen="False" AllowsTransparency="True" Placement="Center"
+                   PlacementTarget="{Binding ElementName=mainWindow}"
+                PopupAnimation="Fade">
+                <Border BorderBrush="Gray" BorderThickness="1" Background="White" CornerRadius="5" SnapsToDevicePixels="True">
+                    <Border.Effect>
+                        <DropShadowEffect ShadowDepth="5" Opacity="0.5" BlurRadius="10"/>
+                    </Border.Effect>
+                    <Grid>
+                        <!-- Content -->
+                        <StackPanel Margin="10,0,10,10">
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20">
+                             Edit
+                            </TextBlock>
+                            <TextBox x:Name="editTextBox" Height="300" Width="300" AcceptsReturn="True" Margin="0,0,0,10" MouseEnter="onEnterTextBox" MouseLeave="onLeaveTextBox" FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="Save" Width="75" Margin="0,0,5,0" Click="onEditSaveButtonPressed"/>
+                                <Button Content="Cancel" Width="75" Click="closeEditPopup"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Popup>
         </Grid>
 
         <ListBox ScrollViewer.CanContentScroll="False" Name="substanceListBox" HorizontalContentAlignment="Stretch" KeyboardNavigation.TabNavigation ="Contained" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">

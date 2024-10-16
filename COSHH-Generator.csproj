@@ -7,25 +7,21 @@
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>icon.ico</ApplicationIcon>
+		<PublishSingleFile>true</PublishSingleFile>
+		<!--<SelfContained>true</SelfContained>-->
     </PropertyGroup>
 	
-	<PropertyGroup>
-		<PublishReadyToRun>true</PublishReadyToRun>
-	</PropertyGroup>
+	
 
     <ItemGroup>
         <Content Include="icon.ico" />
     </ItemGroup>
 
     <ItemGroup>
-        <!--<PackageReference Include="Costura.Fody" Version="5.7.0">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="Fody" Version="6.8.0">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>-->
+		<PackageReference Include="Costura.Fody" Version="5.7.0">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 		<PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.67" />
 		<PackageReference Include="iTextSharp" Version="5.5.13.4" />

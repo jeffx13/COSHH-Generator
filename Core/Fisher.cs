@@ -39,7 +39,6 @@ namespace COSHH_Generator.Core
 
         public async Task<List<Result>> SearchAsync(string query, CancellationToken cancelToken = default)
         {
-            Trace.WriteLine("Searching " + query);
             string encodedQuery = WebUtility.UrlEncode(query.Trim().ToLower().Replace(" ", "-"));
             List<Result> results = new List<Result>();
             
@@ -87,13 +86,13 @@ namespace COSHH_Generator.Core
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            Trace.WriteLine(responseBody);
+            
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(responseBody);
 
             var productNodes = doc.DocumentNode.SelectNodes("//div[@class='ptitleblack bold']");
             var catalogDataNodes = doc.DocumentNode.SelectNodes("//td[@class='catalog_data']//div[@class='catlog_items'][1]/a");
-            Trace.WriteLine(catalogDataNodes);
+            
             if (productNodes != null && catalogDataNodes != null)
             {
                 for (int i = 0; i < productNodes.Count; i++)
@@ -132,7 +131,7 @@ namespace COSHH_Generator.Core
 
                 var body = await response.Content.ReadAsStringAsync();
                 PdfReader reader = new PdfReader(await response.Content.ReadAsStreamAsync());
-                Trace.WriteLine("Extracting");
+                
 
                 for (int page = 1; page <= reader.NumberOfPages; page++)
                 {
